@@ -1,11 +1,14 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { t } from '../../../localization.js';
+import { t, type LanguagePreference, type Locale } from '../../../localization.js';
 
 export type SettingsStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export type SettingsState = {
   maxDiffChars: number;
   draftMaxDiffChars: number;
+  language: LanguagePreference;
+  draftLanguage: LanguagePreference;
+  locale: Locale;
   setupComplete: boolean;
   status: SettingsStatus;
   message: string;
@@ -14,6 +17,9 @@ export type SettingsState = {
 const initialState: SettingsState = {
   maxDiffChars: 120_000,
   draftMaxDiffChars: 120_000,
+  language: 'auto',
+  draftLanguage: 'auto',
+  locale: 'en',
   setupComplete: false,
   status: 'idle',
   message: t('settings.diffDescription'),
@@ -28,6 +34,11 @@ export const settingsSlice = createSlice({
       state.status = 'idle';
       state.message = t('settings.changed');
     },
+    draftLanguageChanged(state, action: PayloadAction<LanguagePreference>) {
+      state.draftLanguage = action.payload;
+      state.status = 'idle';
+      state.message = t('settings.changed');
+    },
     settingsSaveRequested(state) {
       state.status = 'saving';
       state.message = t('settings.savingStatus');
@@ -39,6 +50,8 @@ export const settingsSlice = createSlice({
         message: string;
         maxDiffChars?: number;
         setupComplete?: boolean;
+        language?: LanguagePreference;
+        locale?: Locale;
       }>,
     ) {
       state.status = action.payload.status;
@@ -50,9 +63,18 @@ export const settingsSlice = createSlice({
       if (action.payload.setupComplete !== undefined) {
         state.setupComplete = action.payload.setupComplete;
       }
+      if (action.payload.language !== undefined) {
+        state.language = action.payload.language;
+        state.draftLanguage = action.payload.language;
+      }
+      if (action.payload.locale !== undefined) state.locale = action.payload.locale;
     },
   },
 });
 
-export const { draftMaxDiffCharsChanged, settingsSaveRequested, settingsReceived } =
-  settingsSlice.actions;
+export const {
+  draftLanguageChanged,
+  draftMaxDiffCharsChanged,
+  settingsSaveRequested,
+  settingsReceived,
+} = settingsSlice.actions;

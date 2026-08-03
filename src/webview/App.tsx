@@ -9,9 +9,9 @@ import { t } from '../localization.js';
 
 const App = (): React.JSX.Element => {
   const activeTab = useAppSelector((state) => state.navigation.activeTab);
-  const setupComplete = useAppSelector((state) => state.settings.setupComplete);
+  const { locale, setupComplete } = useAppSelector((state) => state.settings);
   return (
-    <main className={styles.reviewView}>
+    <main className={styles.reviewView} lang={locale}>
       <header className={styles.hero}>
         <div className={styles.eyebrow}>{t('app.eyebrow')}</div>
         <h1>Codivew</h1>

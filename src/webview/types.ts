@@ -29,6 +29,7 @@ export type SaveSettingsMessage = {
   ollamaUrl: unknown;
   model: unknown;
   maxDiffChars: unknown;
+  language: unknown;
 };
 
 export type ExtensionMessage =
@@ -84,10 +85,13 @@ export type WebviewMessage =
       message: string;
       maxDiffChars?: number;
       setupComplete?: boolean;
+      language?: LanguagePreference;
+      locale?: Locale;
     };
 
 export type WebviewInitialState = {
   locale: Locale;
+  language: LanguagePreference;
   workspaces: Array<{ index: number; name: string; path: string }>;
   ollamaUrl: string;
   model: string;
@@ -95,4 +99,4 @@ export type WebviewInitialState = {
   maxDiffChars: number;
   setupComplete: boolean;
 };
-import type { Locale } from '../localization.js';
+import type { LanguagePreference, Locale } from '../localization.js';
