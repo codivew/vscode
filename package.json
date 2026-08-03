@@ -2,7 +2,7 @@
   "name": "codivew-vscode",
   "displayName": "Codivew",
   "description": "Review Git changes with Codivew and a local Ollama model.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "publisher": "knsan189",
   "license": "MIT",
   "icon": "media/codivew-icon-128.png",
