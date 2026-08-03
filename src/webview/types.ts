@@ -25,6 +25,9 @@ export type LoadDiffStatsMessage = {
 
 export type SaveSettingsMessage = {
   type: 'saveSettings';
+  workspaceIndex: unknown;
+  ollamaUrl: unknown;
+  model: unknown;
   maxDiffChars: unknown;
 };
 
@@ -80,6 +83,7 @@ export type WebviewMessage =
       status: 'saved' | 'error';
       message: string;
       maxDiffChars?: number;
+      setupComplete?: boolean;
     };
 
 export type WebviewInitialState = {
@@ -88,4 +92,5 @@ export type WebviewInitialState = {
   model: string;
   baseBranch: string;
   maxDiffChars: number;
+  setupComplete: boolean;
 };

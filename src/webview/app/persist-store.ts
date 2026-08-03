@@ -6,8 +6,6 @@ export function persistStore(store: AppStore): () => void {
     const state = store.getState();
     vscode.setState({
       workspaceIndex: state.review.workspaceIndex,
-      ollamaUrl: state.ollama.url,
-      model: state.ollama.model,
       mode: state.review.mode,
       baseBranch: state.review.baseBranch,
       activeTab: state.navigation.activeTab,

@@ -12,14 +12,22 @@ export type AppStore = EnhancedStore<RootState>;
 const combinedReducer = combineSlices(navigationSlice, ollamaSlice, reviewSlice, settingsSlice);
 
 export function createAppStore(initial: WebviewInitialState, persisted?: PersistedState): AppStore {
-  const maxDiffChars = persisted?.maxDiffChars ?? initial.maxDiffChars;
+  const maxDiffChars = initial.maxDiffChars;
+  const persistedWorkspaceIndex = persisted?.workspaceIndex;
+  const workspaceIndex = initial.workspaces.some(
+    (workspace) => workspace.index === persistedWorkspaceIndex,
+  )
+    ? (persistedWorkspaceIndex ?? -1)
+    : (initial.workspaces[0]?.index ?? -1);
   return configureStore({
     reducer: combinedReducer,
     preloadedState: {
-      navigation: { activeTab: persisted?.activeTab ?? 'review' },
+      navigation: {
+        activeTab: initial.setupComplete ? (persisted?.activeTab ?? 'review') : 'settings',
+      },
       ollama: {
-        url: persisted?.ollamaUrl ?? initial.ollamaUrl,
-        model: persisted?.model ?? initial.model,
+        url: initial.ollamaUrl,
+        model: initial.model,
         models: [],
         status: 'idle' as const,
         message: 'Ollama URL을 입력하세요.',
@@ -27,7 +35,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
       },
       review: {
         workspaces: initial.workspaces,
-        workspaceIndex: persisted?.workspaceIndex ?? initial.workspaces[0]?.index ?? -1,
+        workspaceIndex,
         mode: persisted?.mode ?? 'working',
         baseBranch: persisted?.baseBranch ?? initial.baseBranch,
         status: 'idle' as const,
@@ -41,6 +49,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         maxDiffChars,
         draftMaxDiffChars:
           persisted?.maxDiffCharsDraft ?? persisted?.maxDiffChars ?? initial.maxDiffChars,
+        setupComplete: initial.setupComplete,
         status: 'idle' as const,
         message: '한 번의 리뷰에 전달할 필터링된 Diff 크기를 설정합니다.',
       },

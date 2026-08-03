@@ -1,0 +1,13 @@
+.hint {
+  margin-top: 5px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+}
+
+.hint[data-status='error'] {
+  color: var(--vscode-errorForeground);
+}
+
+.hint[data-status='loaded'] {
+  color: var(--vscode-testing-iconPassed);
+}

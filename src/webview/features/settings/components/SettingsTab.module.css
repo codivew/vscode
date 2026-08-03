@@ -1,0 +1,113 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 14px;
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 8px;
+  background: var(--vscode-editorWidget-background);
+}
+
+.card .field {
+  margin: 0;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--vscode-widget-border);
+}
+
+.icon {
+  display: grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  font-family: var(--vscode-editor-font-family);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.heading h2 {
+  margin: 0 0 2px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.heading p {
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+}
+
+.hint {
+  margin-top: 5px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--vscode-widget-border);
+}
+
+.sectionTitle h3 {
+  margin: 0 0 2px;
+  font-size: 12px;
+}
+
+.sectionTitle p {
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.presets button {
+  min-height: 28px;
+  padding: 4px;
+  border: 1px solid var(--vscode-widget-border);
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-input-background);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.presets button:hover,
+.presets button.selected {
+  border-color: var(--vscode-focusBorder);
+  color: var(--vscode-foreground);
+  background: var(--vscode-list-hoverBackground);
+}
+
+.status {
+  min-height: 30px;
+  padding: 8px 9px;
+  border-radius: 4px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-textBlockQuote-background);
+  font-size: 10px;
+}
+
+.status[data-status='saved'] {
+  color: var(--vscode-testing-iconPassed);
+}
+
+.status[data-status='error'] {
+  color: var(--vscode-errorForeground);
+}
+
+.save {
+  width: 100%;
+}

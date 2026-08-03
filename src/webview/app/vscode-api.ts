@@ -2,8 +2,6 @@ import type { ExtensionMessage } from '../types.js';
 
 export type PersistedState = {
   workspaceIndex: number;
-  ollamaUrl: string;
-  model: string;
   mode: string;
   baseBranch: string;
   activeTab: 'review' | 'settings';

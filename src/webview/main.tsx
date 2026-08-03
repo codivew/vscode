@@ -8,7 +8,6 @@ import { persistStore } from './app/persist-store.js';
 import { createAppStore } from './app/store.js';
 import { vscode } from './app/vscode-api.js';
 import type { WebviewInitialState } from './types.js';
-import './review.css';
 
 const root = document.getElementById('root');
 if (root === null) throw new Error('Codivew Webview root element is missing.');

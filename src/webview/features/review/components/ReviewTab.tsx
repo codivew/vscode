@@ -1,17 +1,17 @@
 /** @jsxImportSource react */
 import React, { useEffect, type FormEvent } from 'react';
-import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
-import { vscode } from '../../app/vscode-api.js';
-import Field from '../../shared/Field.js';
-import OllamaFields from '../ollama/OllamaFields.js';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
+import { vscode } from '../../../app/vscode-api.js';
+import Field from '../../../shared/components/Field.js';
+import { tabChanged } from '../../navigation/navigationSlice.js';
 import {
   baseBranchChanged,
   diffStatsInvalidated,
   diffStatsRequested,
   modeChanged,
-  workspaceChanged,
-} from './reviewSlice.js';
+} from '../reviewSlice.js';
 import ReviewTargets from './ReviewTargets.js';
+import styles from './ReviewTab.module.css';
 
 let nextStatsRequestId = 0;
 
@@ -22,7 +22,8 @@ const ReviewTab = (): React.JSX.Element => {
   const maxDiffChars = useAppSelector((state) => state.settings.maxDiffChars);
   const running = review.status === 'running';
   const hasWorkspace = review.workspaces.length > 0;
-  const hasModels = ollama.status === 'loaded' && ollama.models.length > 0;
+  const hasModel = ollama.model.trim().length > 0;
+  const workspace = review.workspaces.find((item) => item.index === review.workspaceIndex);
   const diffTooLarge = review.diffStats.filteredCharCount > review.diffStats.maxDiffChars;
 
   useEffect(() => {
@@ -76,24 +77,22 @@ const ReviewTab = (): React.JSX.Element => {
   };
 
   return (
-    <form className="card" onSubmit={submit}>
-      <Field label="워크스페이스" htmlFor="workspace">
-        <select
-          id="workspace"
-          disabled={!hasWorkspace || running}
-          value={review.workspaceIndex}
-          onChange={(event) => dispatch(workspaceChanged(Number(event.target.value)))}
+    <form className={styles.card} onSubmit={submit}>
+      <section className={styles.reviewEnvironment} aria-label="현재 리뷰 환경">
+        <div>
+          <span>현재 리뷰 환경</span>
+          <strong>{workspace?.name ?? '워크스페이스 없음'}</strong>
+          <small>{ollama.model || '모델 미설정'}</small>
+        </div>
+        <button
+          className={styles.textButton}
+          type="button"
+          disabled={running}
+          onClick={() => dispatch(tabChanged('settings'))}
         >
-          {!hasWorkspace && <option value={-1}>열린 워크스페이스가 없습니다</option>}
-          {review.workspaces.map((workspace) => (
-            <option key={workspace.index} value={workspace.index}>
-              {workspace.name} · {workspace.path}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <OllamaFields disabled={running} />
+          변경
+        </button>
+      </section>
 
       <Field label="리뷰 범위" htmlFor="mode">
         <select
@@ -120,12 +119,12 @@ const ReviewTab = (): React.JSX.Element => {
 
       <ReviewTargets review={review} />
 
-      <div className="actions">
+      <div className={styles.actions}>
         <button
           type="submit"
           disabled={
             !hasWorkspace ||
-            !hasModels ||
+            !hasModel ||
             review.diffStatsStatus !== 'loaded' ||
             review.diffStats.fileCount === 0 ||
             diffTooLarge ||
@@ -136,7 +135,7 @@ const ReviewTab = (): React.JSX.Element => {
         </button>
         {running && (
           <button
-            className="secondary"
+            className={styles.secondary}
             type="button"
             onClick={() => vscode.postMessage({ type: 'cancel' })}
           >
@@ -145,19 +144,19 @@ const ReviewTab = (): React.JSX.Element => {
         )}
       </div>
 
-      <div className="status" data-status={review.status} role="status" aria-live="polite">
+      <div className={styles.status} data-status={review.status} role="status" aria-live="polite">
         {review.statusMessage}
       </div>
 
       {review.result !== undefined && (
-        <section className="result">
-          <div className="metrics">
+        <section className={styles.result}>
+          <div className={styles.metrics}>
             <Metric value={review.result.verdict} label="판정" />
             <Metric value={review.result.reviewedFileCount} label="파일" />
             <Metric value={review.result.issueCount} label="항목" />
           </div>
           <button
-            className="secondary report-button"
+            className={`${styles.secondary} ${styles.reportButton}`}
             type="button"
             onClick={() => vscode.postMessage({ type: 'openReport' })}
           >
@@ -171,7 +170,7 @@ const ReviewTab = (): React.JSX.Element => {
 
 const Metric = ({ value, label }: { value: string | number; label: string }): React.JSX.Element => {
   return (
-    <div className="metric">
+    <div className={styles.metric}>
       <strong>{value}</strong>
       <span>{label}</span>
     </div>

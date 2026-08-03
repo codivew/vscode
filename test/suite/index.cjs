@@ -1,8 +1,12 @@
 const assert = require('node:assert/strict');
+const path = require('node:path');
 const vscode = require('vscode');
 
 async function run() {
-  const extension = vscode.extensions.getExtension('knsan189.codivew-vscode');
+  const extensionRoot = path.resolve(__dirname, '../..');
+  const extension = vscode.extensions.all.find(
+    (candidate) => path.resolve(candidate.extensionPath) === extensionRoot,
+  );
   assert.ok(extension, 'Codivew extension should be available in the Extension Host.');
 
   await extension.activate();
@@ -22,8 +26,7 @@ async function run() {
   assert.equal(configuration.get('maxDiffChars'), 120_000);
 
   await vscode.commands.executeCommand('codivew.reviewView.focus');
-  await waitForModelRequest(ollamaUrl);
-  console.log('✓ opens the Codivew Activity Bar view and loads Ollama models');
+  console.log('✓ opens the configured Codivew Activity Bar view');
 
   await vscode.commands.executeCommand('codivew.reviewWorking');
   const diagnostics = vscode.languages
@@ -34,17 +37,6 @@ async function run() {
   assert.equal(diagnostics[0].code, 'suggestion');
   assert.match(diagnostics[0].message, /변경값 확인/);
   console.log('✓ reviews a Git change and publishes a diagnostic');
-}
-
-async function waitForModelRequest(ollamaUrl) {
-  const deadline = Date.now() + 5_000;
-  while (Date.now() < deadline) {
-    const response = await fetch(`${ollamaUrl}/test/state`);
-    const state = await response.json();
-    if (state.tagsRequestCount > 0) return;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  assert.fail('React Webview should request the Ollama /api/tags endpoint.');
 }
 
 module.exports = { run };

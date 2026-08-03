@@ -5,6 +5,7 @@ export type SettingsStatus = 'idle' | 'saving' | 'saved' | 'error';
 export type SettingsState = {
   maxDiffChars: number;
   draftMaxDiffChars: number;
+  setupComplete: boolean;
   status: SettingsStatus;
   message: string;
 };
@@ -12,6 +13,7 @@ export type SettingsState = {
 const initialState: SettingsState = {
   maxDiffChars: 120_000,
   draftMaxDiffChars: 120_000,
+  setupComplete: false,
   status: 'idle',
   message: '한 번의 리뷰에 전달할 필터링된 Diff 크기를 설정합니다.',
 };
@@ -35,6 +37,7 @@ export const settingsSlice = createSlice({
         status: 'saved' | 'error';
         message: string;
         maxDiffChars?: number;
+        setupComplete?: boolean;
       }>,
     ) {
       state.status = action.payload.status;
@@ -42,6 +45,9 @@ export const settingsSlice = createSlice({
       if (action.payload.maxDiffChars !== undefined) {
         state.maxDiffChars = action.payload.maxDiffChars;
         state.draftMaxDiffChars = action.payload.maxDiffChars;
+      }
+      if (action.payload.setupComplete !== undefined) {
+        state.setupComplete = action.payload.setupComplete;
       }
     },
   },

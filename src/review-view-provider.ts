@@ -75,14 +75,33 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async saveSettings(message: SaveSettingsMessage): Promise<void> {
+    const folders = vscode.workspace.workspaceFolders ?? [];
+    const workspaceIndex = numberValue(message.workspaceIndex);
+    const folder = workspaceIndex === undefined ? undefined : folders[workspaceIndex];
+    const ollamaUrl = validHttpUrl(message.ollamaUrl);
+    const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
+    if (folder === undefined) {
+      this.postSettings('error', '기본 워크스페이스를 선택하세요.');
+      return;
+    }
+    if (ollamaUrl === undefined) {
+      this.postSettings('error', '올바른 HTTP 또는 HTTPS Ollama URL을 입력하세요.');
+      return;
+    }
+    if (model === undefined) {
+      this.postSettings('error', '사용할 Ollama 모델을 선택하세요.');
+      return;
+    }
     if (maxDiffChars === undefined || maxDiffChars < 1_000) {
       this.postSettings('error', '최대 Diff 크기는 1,000자 이상의 정수여야 합니다.');
       return;
     }
-    const configuration = vscode.workspace.getConfiguration('codivew');
+    const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
+    await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
+    await configuration.update('model', model, vscode.ConfigurationTarget.Global);
     await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
-    this.postSettings('saved', '설정을 저장했습니다.', maxDiffChars);
+    this.postSettings('saved', '리뷰 환경 설정을 저장했습니다.', maxDiffChars, true);
   }
 
   private async loadDiffStats(message: LoadDiffStatsMessage): Promise<void> {
@@ -222,10 +241,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
-    await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
-    await configuration.update('model', model, vscode.ConfigurationTarget.Global);
     await configuration.update('baseBranch', baseBranch, vscode.ConfigurationTarget.Global);
-    await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
 
     this.postState('running', '리뷰를 준비하는 중...');
     await this.controller.run(
@@ -293,12 +309,18 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private postSettings(status: 'saved' | 'error', message: string, maxDiffChars?: number): void {
+  private postSettings(
+    status: 'saved' | 'error',
+    message: string,
+    maxDiffChars?: number,
+    setupComplete?: boolean,
+  ): void {
     void this.view?.webview.postMessage({
       type: 'settings',
       status,
       message,
       ...(maxDiffChars === undefined ? {} : { maxDiffChars }),
+      ...(setupComplete === undefined ? {} : { setupComplete }),
     });
   }
 
@@ -331,6 +353,10 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
   private getInitialState(): WebviewInitialState {
     const folders = vscode.workspace.workspaceFolders ?? [];
     const configuration = vscode.workspace.getConfiguration('codivew', folders[0]?.uri);
+    const ollamaUrl = configuration.inspect<string>('ollamaUrl');
+    const model = configuration.inspect<string>('model');
+    const configuredOllamaUrl = ollamaUrl?.globalValue ?? ollamaUrl?.workspaceValue;
+    const configuredModel = model?.globalValue ?? model?.workspaceValue;
     return {
       workspaces: folders.map((folder, index) => ({
         index,
@@ -341,6 +367,9 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       model: configuration.get('model', 'qwen3.6:35b-a3b-coding-mxfp8'),
       baseBranch: configuration.get('baseBranch', 'main'),
       maxDiffChars: configuration.get('maxDiffChars', DEFAULT_MAX_DIFF_CHARS),
+      setupComplete:
+        validHttpUrl(configuredOllamaUrl) !== undefined &&
+        stringValue(configuredModel) !== undefined,
     };
   }
 }

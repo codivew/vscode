@@ -1,14 +1,21 @@
 /** @jsxImportSource react */
 import React, { useEffect } from 'react';
-import { vscode } from '../../app/vscode-api.js';
-import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
-import Field from '../../shared/Field.js';
-import { validHttpUrl } from '../../shared/url.js';
-import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from './ollamaSlice.js';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
+import { vscode } from '../../../app/vscode-api.js';
+import Field from '../../../shared/components/Field.js';
+import { validHttpUrl } from '../../../shared/url.js';
+import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../ollamaSlice.js';
+import styles from './OllamaFields.module.css';
 
 let nextRequestId = 0;
 
-const OllamaFields = ({ disabled }: { disabled: boolean }): React.JSX.Element => {
+const OllamaFields = ({
+  disabled,
+  fieldClassName,
+}: {
+  disabled: boolean;
+  fieldClassName?: string;
+}): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const ollama = useAppSelector((state) => state.ollama);
   const hasModels = ollama.status === 'loaded' && ollama.models.length > 0;
@@ -35,7 +42,7 @@ const OllamaFields = ({ disabled }: { disabled: boolean }): React.JSX.Element =>
 
   return (
     <>
-      <Field label="Ollama URL" htmlFor="ollama-url">
+      <Field label="Ollama URL" htmlFor="ollama-url" className={fieldClassName}>
         <input
           id="ollama-url"
           type="url"
@@ -45,10 +52,10 @@ const OllamaFields = ({ disabled }: { disabled: boolean }): React.JSX.Element =>
           onChange={(event) => dispatch(urlChanged(event.target.value))}
           required
         />
-        <div className="hint">입력한 주소는 Codivew 사용자 설정에 저장됩니다.</div>
+        <div className={styles.hint}>입력한 주소는 Codivew 사용자 설정에 저장됩니다.</div>
       </Field>
 
-      <Field label="모델" htmlFor="model">
+      <Field label="모델" htmlFor="model" className={fieldClassName}>
         <select
           id="model"
           value={ollama.model}
@@ -67,7 +74,7 @@ const OllamaFields = ({ disabled }: { disabled: boolean }): React.JSX.Element =>
             </option>
           ))}
         </select>
-        <div className="hint" data-status={ollama.status}>
+        <div className={styles.hint} data-status={ollama.status}>
           {ollama.message}
         </div>
       </Field>

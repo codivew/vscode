@@ -1,7 +1,8 @@
 /** @jsxImportSource react */
 import React from 'react';
-import { formatNumber } from '../../shared/format.js';
-import type { ReviewState } from './reviewSlice.js';
+import { formatNumber } from '../../../shared/format.js';
+import type { ReviewState } from '../reviewSlice.js';
+import styles from './ReviewTargets.module.css';
 
 const ReviewTargets = ({
   review,
@@ -11,35 +12,39 @@ const ReviewTargets = ({
   const { diffStats, diffStatsStatus, diffStatsMessage } = review;
   const diffTooLarge = diffStats.filteredCharCount > diffStats.maxDiffChars;
   return (
-    <section className="diff-summary" data-status={diffStatsStatus} data-over-limit={diffTooLarge}>
-      <div className="diff-summary-header">
+    <section
+      className={styles.diffSummary}
+      data-status={diffStatsStatus}
+      data-over-limit={diffTooLarge}
+    >
+      <div className={styles.diffSummaryHeader}>
         <span>리뷰 대상</span>
         <small>{diffStatsMessage}</small>
       </div>
       {diffStatsStatus === 'loading' && (
-        <div className="diff-placeholder" aria-live="polite">
+        <div className={styles.diffPlaceholder} aria-live="polite">
           파일 목록을 불러오는 중...
         </div>
       )}
       {diffStatsStatus === 'error' && (
-        <div className="diff-placeholder error" aria-live="polite">
+        <div className={`${styles.diffPlaceholder} ${styles.error}`} aria-live="polite">
           변경 파일을 불러오지 못했습니다.
         </div>
       )}
       {diffStatsStatus === 'loaded' && diffStats.files.length === 0 && (
-        <div className="diff-placeholder" aria-live="polite">
+        <div className={styles.diffPlaceholder} aria-live="polite">
           리뷰할 변경 파일이 없습니다.
         </div>
       )}
       {diffStatsStatus === 'loaded' && diffStats.files.length > 0 && (
         <>
-          <div className="file-summary" aria-live="polite">
+          <div className={styles.fileSummary} aria-live="polite">
             <strong>{formatNumber(diffStats.fileCount)}개 파일</strong>
             <span>{formatNumber(diffStats.changedLineCount)}줄 변경</span>
-            <span className="additions">+{formatNumber(diffStats.additions)}</span>
-            <span className="deletions">-{formatNumber(diffStats.deletions)}</span>
+            <span className={styles.additions}>+{formatNumber(diffStats.additions)}</span>
+            <span className={styles.deletions}>-{formatNumber(diffStats.deletions)}</span>
           </div>
-          <ul className="file-list">
+          <ul className={styles.fileList}>
             {diffStats.files.map((path) => (
               <FileRow key={path} path={path} />
             ))}
@@ -59,15 +64,15 @@ const DiffSize = ({
   tooLarge: boolean;
 }): React.JSX.Element => {
   return (
-    <div className="diff-size">
-      <div className="diff-size-label">
+    <div className={styles.diffSize}>
+      <div className={styles.diffSizeLabel}>
         <span>필터링된 Diff</span>
         <strong>
           {formatNumber(stats.filteredCharCount)} / {formatNumber(stats.maxDiffChars)}자
         </strong>
       </div>
       <div
-        className="diff-size-track"
+        className={styles.diffSizeTrack}
         role="progressbar"
         aria-label="필터링된 Diff 크기"
         aria-valuenow={stats.filteredCharCount}
@@ -75,14 +80,14 @@ const DiffSize = ({
         aria-valuemax={stats.maxDiffChars}
       >
         <div
-          className="diff-size-value"
+          className={styles.diffSizeValue}
           style={{
             width: `${Math.min(100, (stats.filteredCharCount / stats.maxDiffChars) * 100)}%`,
           }}
         />
       </div>
       {tooLarge && (
-        <div className="diff-size-error">
+        <div className={styles.diffSizeError}>
           최대 크기를 {formatNumber(stats.filteredCharCount - stats.maxDiffChars)}자 초과했습니다.
         </div>
       )}
@@ -96,13 +101,13 @@ const FileRow = ({ path }: { path: string }): React.JSX.Element => {
   const name = separator < 0 ? path : path.slice(separator + 1);
   return (
     <li title={path}>
-      <svg className="file-icon" viewBox="0 0 16 16" aria-hidden="true">
+      <svg className={styles.fileIcon} viewBox="0 0 16 16" aria-hidden="true">
         <path d="M3 1.5h6l4 4V14.5H3z" />
         <path d="M9 1.5v4h4" />
       </svg>
-      <span className="file-path">
-        {directory !== '' && <span className="file-directory">{directory}/</span>}
-        <span className="file-name">{name}</span>
+      <span className={styles.filePath}>
+        {directory !== '' && <span className={styles.fileDirectory}>{directory}/</span>}
+        <span className={styles.fileName}>{name}</span>
       </span>
     </li>
   );

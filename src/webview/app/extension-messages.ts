@@ -1,6 +1,7 @@
 import { modelsReceived } from '../features/ollama/ollamaSlice.js';
 import { diffStatsReceived, reviewStateReceived } from '../features/review/reviewSlice.js';
 import { settingsReceived } from '../features/settings/settingsSlice.js';
+import { tabChanged } from '../features/navigation/navigationSlice.js';
 import type { WebviewMessage } from '../types.js';
 import type { AppStore } from './store.js';
 
@@ -15,7 +16,9 @@ export function connectExtensionMessages(store: AppStore): () => void {
       return;
     }
     if (data.type === 'settings') {
+      const completingSetup = !store.getState().settings.setupComplete;
       store.dispatch(settingsReceived(data));
+      if (data.status === 'saved' && completingSetup) store.dispatch(tabChanged('review'));
       return;
     }
     store.dispatch(reviewStateReceived(data));

@@ -1,0 +1,62 @@
+:global(:root) {
+  color-scheme: light dark;
+}
+
+:global(*) {
+  box-sizing: border-box;
+}
+
+:global(body) {
+  margin: 0;
+  color: var(--vscode-foreground);
+  background: var(--vscode-sideBar-background);
+  font: 13px/1.45 var(--vscode-font-family);
+}
+
+:global(button) {
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 3px;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+:global(button:hover) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+:global(button:disabled) {
+  cursor: default;
+  opacity: 0.55;
+}
+
+main.reviewView {
+  padding: 18px 14px 28px;
+}
+
+.hero {
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  margin: 5px 0 4px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.eyebrow {
+  color: var(--vscode-descriptionForeground);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lead {
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+}
