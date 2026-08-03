@@ -1,4 +1,5 @@
 export type Locale = 'en' | 'ko-KR';
+export type LanguagePreference = 'auto' | Locale;
 
 const messages = {
   'app.eyebrow': ['Local AI code review', '로컬 AI 코드 리뷰'],
@@ -55,6 +56,14 @@ const messages = {
     'This project will be selected by default on the review screen.',
     '리뷰 화면에서 기본으로 사용할 프로젝트입니다.',
   ],
+  'settings.language': ['Language', '언어'],
+  'settings.languageHint': [
+    'Follow the VS Code display language or choose a fixed language.',
+    'VS Code 표시 언어를 따르거나 사용할 언어를 고정합니다.',
+  ],
+  'settings.languageAuto': ['Automatic (VS Code)', '자동 (VS Code)'],
+  'settings.languageEnglish': ['English', 'English'],
+  'settings.languageKorean': ['Korean', '한국어'],
   'settings.sizeTitle': ['Review size limit', '리뷰 크기 제한'],
   'settings.sizeDescription': [
     'Prevent context overflow and slow responses from large Diffs.',
@@ -124,6 +133,7 @@ const messages = {
     '최대 Diff 크기는 1,000자 이상의 정수여야 합니다.',
   ],
   'host.settingsSaved': ['Review environment settings saved.', '리뷰 환경 설정을 저장했습니다.'],
+  'host.invalidLanguage': ['Select a valid language.', '올바른 언어를 선택하세요.'],
   'host.scopeUnavailable': [
     'Could not determine the review scope.',
     '리뷰 범위를 확인할 수 없습니다.',
@@ -164,6 +174,14 @@ let activeLocale: Locale = 'en';
 
 export function parseLocale(language: string): Locale {
   return language.toLowerCase().startsWith('ko') ? 'ko-KR' : 'en';
+}
+
+export function parseLanguagePreference(value: unknown): LanguagePreference | undefined {
+  return value === 'auto' || value === 'en' || value === 'ko-KR' ? value : undefined;
+}
+
+export function resolveLocale(preference: LanguagePreference, vscodeLanguage: string): Locale {
+  return preference === 'auto' ? parseLocale(vscodeLanguage) : preference;
 }
 
 export function setLocale(locale: Locale): void {

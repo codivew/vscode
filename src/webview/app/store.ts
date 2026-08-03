@@ -50,6 +50,9 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         maxDiffChars,
         draftMaxDiffChars:
           persisted?.maxDiffCharsDraft ?? persisted?.maxDiffChars ?? initial.maxDiffChars,
+        language: initial.language,
+        draftLanguage: initial.language,
+        locale: initial.locale,
         setupComplete: initial.setupComplete,
         status: 'idle' as const,
         message: t('settings.diffDescription'),

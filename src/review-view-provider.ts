@@ -8,11 +8,20 @@ import {
   ERROR_CODES,
   ReviewError,
   ReviewMode,
+  setLanguage,
   type ReviewProgressStage,
   type RunReviewResult,
 } from 'codivew/core';
 import { progressMessage, ReviewController } from './review-controller.js';
-import { getLocale, t } from './localization.js';
+import {
+  getLocale,
+  parseLanguagePreference,
+  resolveLocale,
+  setLocale,
+  t,
+  type LanguagePreference,
+  type Locale,
+} from './localization.js';
 import type {
   DiffStats,
   ExtensionMessage,
@@ -82,6 +91,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const ollamaUrl = validHttpUrl(message.ollamaUrl);
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
+    const language = parseLanguagePreference(message.language);
     if (folder === undefined) {
       this.postSettings('error', t('host.defaultWorkspace'));
       return;
@@ -98,11 +108,19 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       this.postSettings('error', t('host.maxDiffInvalid'));
       return;
     }
+    if (language === undefined) {
+      this.postSettings('error', t('host.invalidLanguage'));
+      return;
+    }
     const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
     await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
     await configuration.update('model', model, vscode.ConfigurationTarget.Global);
     await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
-    this.postSettings('saved', t('host.settingsSaved'), maxDiffChars, true);
+    await configuration.update('language', language, vscode.ConfigurationTarget.Global);
+    const locale = resolveLocale(language, vscode.env.language);
+    setLocale(locale);
+    setLanguage(locale);
+    this.postSettings('saved', t('host.settingsSaved'), maxDiffChars, true, language, locale);
   }
 
   private async loadDiffStats(message: LoadDiffStatsMessage): Promise<void> {
@@ -315,6 +333,8 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     message: string,
     maxDiffChars?: number,
     setupComplete?: boolean,
+    language?: LanguagePreference,
+    locale?: Locale,
   ): void {
     void this.view?.webview.postMessage({
       type: 'settings',
@@ -322,6 +342,8 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       message,
       ...(maxDiffChars === undefined ? {} : { maxDiffChars }),
       ...(setupComplete === undefined ? {} : { setupComplete }),
+      ...(language === undefined ? {} : { language }),
+      ...(locale === undefined ? {} : { locale }),
     });
   }
 
@@ -358,8 +380,10 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const model = configuration.inspect<string>('model');
     const configuredOllamaUrl = ollamaUrl?.globalValue ?? ollamaUrl?.workspaceValue;
     const configuredModel = model?.globalValue ?? model?.workspaceValue;
+    const language = parseLanguagePreference(configuration.get('language', 'auto')) ?? 'auto';
     return {
       locale: getLocale(),
+      language,
       workspaces: folders.map((folder, index) => ({
         index,
         name: folder.name,

@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import { ReviewMode, setLanguage } from 'codivew/core';
-import { parseLocale, setLocale, t } from './localization.js';
+import { parseLanguagePreference, resolveLocale, setLocale, t } from './localization.js';
 import { ReviewController } from './review-controller.js';
 import { ReviewViewProvider } from './review-view-provider.js';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const locale = parseLocale(vscode.env.language);
+  const configuredLanguage = vscode.workspace.getConfiguration('codivew').get('language', 'auto');
+  const language = parseLanguagePreference(configuredLanguage) ?? 'auto';
+  const locale = resolveLocale(language, vscode.env.language);
   setLocale(locale);
   setLanguage(locale);
   console.info('[Codivew] Extension activated.');

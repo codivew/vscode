@@ -2,8 +2,9 @@
 
 Review Git changes with a local Ollama model without leaving VS Code.
 
-Codivew automatically follows the VS Code display language. English and Korean are supported
-across the review view, notifications, generated feedback, reports, commands, and settings.
+Codivew supports English and Korean across the review view, notifications, generated feedback,
+reports, commands, and settings. It follows the VS Code display language by default, or you can
+select a fixed language from the **Settings** tab.
 
 ![Codivew review view](media/codivew-review.png)
 
@@ -31,7 +32,8 @@ across the review view, notifications, generated feedback, reports, commands, an
 4. Select the review range and click **Start review**.
 5. Review findings in the Problems panel or open the complete report.
 
-Workspace, Ollama connection, model, and maximum Diff size can be changed from the **Settings** tab.
+Language, workspace, Ollama connection, model, and maximum Diff size can be changed from the
+**Settings** tab.
 
 ## Review Ranges
 
