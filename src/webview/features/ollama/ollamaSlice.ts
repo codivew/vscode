@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { t } from '../../../localization.js';
 
 export type ModelsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
@@ -16,7 +17,7 @@ const initialState: OllamaState = {
   model: '',
   models: [],
   status: 'idle',
-  message: 'Ollama URL을 입력하세요.',
+  message: t('ollama.enterUrl'),
   requestId: 0,
 };
 
@@ -39,7 +40,7 @@ export const ollamaSlice = createSlice({
     modelsRequested(state, action: PayloadAction<number>) {
       state.models = [];
       state.status = 'loading';
-      state.message = '설치된 모델을 조회하는 중...';
+      state.message = t('ollama.fetching');
       state.requestId = action.payload;
     },
     modelsReceived(

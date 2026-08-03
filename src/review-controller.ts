@@ -9,6 +9,7 @@ import {
   type ReviewProgressStage,
   type RunReviewResult,
 } from 'codivew/core';
+import { t } from './localization.js';
 
 const DIAGNOSTIC_SOURCE = 'Codivew';
 
@@ -38,7 +39,7 @@ export class ReviewController {
 
   async run(input: ReviewInput, hooks: ReviewHooks = {}): Promise<RunReviewResult | undefined> {
     if (this.activeController !== undefined) {
-      const message = '이미 Codivew 리뷰가 진행 중입니다.';
+      const message = t('host.alreadyRunning');
       hooks.onError?.(message);
       void vscode.window.showWarningMessage(message);
       return undefined;
@@ -50,7 +51,7 @@ export class ReviewController {
       const result = await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: 'Codivew 리뷰',
+          title: t('host.reviewTitle'),
           cancellable: true,
         },
         async (progress, token) => {
@@ -81,7 +82,10 @@ export class ReviewController {
       if (input.openReport) this.openReport(result);
       hooks.onCompleted?.(result);
       void vscode.window.showInformationMessage(
-        `Codivew 리뷰 완료: ${result.reviewedFileCount}개 파일, ${result.issueCount}개 항목`,
+        t('host.completed', {
+          files: result.reviewedFileCount,
+          issues: result.issueCount,
+        }),
       );
       return result;
     } catch (error) {
@@ -94,7 +98,7 @@ export class ReviewController {
       }
       const message = error instanceof Error ? error.message : String(error);
       hooks.onError?.(message);
-      void vscode.window.showErrorMessage(`Codivew 리뷰 실패: ${message}`);
+      void vscode.window.showErrorMessage(t('host.failed', { message }));
       return undefined;
     } finally {
       if (this.activeController === controller) this.activeController = undefined;
@@ -107,7 +111,7 @@ export class ReviewController {
 
   openLatestReport(): void {
     if (this.latestResult === undefined) {
-      void vscode.window.showInformationMessage('아직 생성된 Codivew 리포트가 없습니다.');
+      void vscode.window.showInformationMessage(t('host.noReport'));
       return;
     }
     this.openReport(this.latestResult);
@@ -126,9 +130,9 @@ export class ReviewController {
 
 export function progressMessage(stage: ReviewProgressStage): string {
   return {
-    'collecting-diff': 'Git 변경사항 수집 중...',
-    'generating-review': 'Ollama로 리뷰 생성 중...',
-    completed: '리포트 생성 완료',
+    'collecting-diff': t('host.collecting'),
+    'generating-review': t('host.generating'),
+    completed: t('host.reportComplete'),
   }[stage];
 }
 

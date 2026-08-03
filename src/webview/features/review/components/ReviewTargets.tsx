@@ -3,6 +3,7 @@ import React from 'react';
 import { formatNumber } from '../../../shared/format.js';
 import type { ReviewState } from '../reviewSlice.js';
 import styles from './ReviewTargets.module.css';
+import { t } from '../../../../localization.js';
 
 const ReviewTargets = ({
   review,
@@ -18,29 +19,31 @@ const ReviewTargets = ({
       data-over-limit={diffTooLarge}
     >
       <div className={styles.diffSummaryHeader}>
-        <span>리뷰 대상</span>
+        <span>{t('targets.title')}</span>
         <small>{diffStatsMessage}</small>
       </div>
       {diffStatsStatus === 'loading' && (
         <div className={styles.diffPlaceholder} aria-live="polite">
-          파일 목록을 불러오는 중...
+          {t('targets.loading')}
         </div>
       )}
       {diffStatsStatus === 'error' && (
         <div className={`${styles.diffPlaceholder} ${styles.error}`} aria-live="polite">
-          변경 파일을 불러오지 못했습니다.
+          {t('targets.error')}
         </div>
       )}
       {diffStatsStatus === 'loaded' && diffStats.files.length === 0 && (
         <div className={styles.diffPlaceholder} aria-live="polite">
-          리뷰할 변경 파일이 없습니다.
+          {t('targets.empty')}
         </div>
       )}
       {diffStatsStatus === 'loaded' && diffStats.files.length > 0 && (
         <>
           <div className={styles.fileSummary} aria-live="polite">
-            <strong>{formatNumber(diffStats.fileCount)}개 파일</strong>
-            <span>{formatNumber(diffStats.changedLineCount)}줄 변경</span>
+            <strong>{t('targets.fileCount', { count: formatNumber(diffStats.fileCount) })}</strong>
+            <span>
+              {t('targets.lineCount', { count: formatNumber(diffStats.changedLineCount) })}
+            </span>
             <span className={styles.additions}>+{formatNumber(diffStats.additions)}</span>
             <span className={styles.deletions}>-{formatNumber(diffStats.deletions)}</span>
           </div>
@@ -66,15 +69,16 @@ const DiffSize = ({
   return (
     <div className={styles.diffSize}>
       <div className={styles.diffSizeLabel}>
-        <span>필터링된 Diff</span>
+        <span>{t('targets.filteredDiff')}</span>
         <strong>
-          {formatNumber(stats.filteredCharCount)} / {formatNumber(stats.maxDiffChars)}자
+          {formatNumber(stats.filteredCharCount)} /{' '}
+          {t('targets.characters', { count: formatNumber(stats.maxDiffChars) })}
         </strong>
       </div>
       <div
         className={styles.diffSizeTrack}
         role="progressbar"
-        aria-label="필터링된 Diff 크기"
+        aria-label={t('targets.diffSize')}
         aria-valuenow={stats.filteredCharCount}
         aria-valuemin={0}
         aria-valuemax={stats.maxDiffChars}
@@ -88,7 +92,9 @@ const DiffSize = ({
       </div>
       {tooLarge && (
         <div className={styles.diffSizeError}>
-          최대 크기를 {formatNumber(stats.filteredCharCount - stats.maxDiffChars)}자 초과했습니다.
+          {t('targets.overLimit', {
+            count: formatNumber(stats.filteredCharCount - stats.maxDiffChars),
+          })}
         </div>
       )}
     </div>

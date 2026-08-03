@@ -5,6 +5,7 @@ import { emptyDiffStats, reviewSlice } from '../features/review/reviewSlice.js';
 import { settingsSlice } from '../features/settings/settingsSlice.js';
 import type { WebviewInitialState } from '../types.js';
 import type { PersistedState } from './vscode-api.js';
+import { t } from '../../localization.js';
 
 export type RootState = ReturnType<typeof combinedReducer>;
 export type AppStore = EnhancedStore<RootState>;
@@ -30,7 +31,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         model: initial.model,
         models: [],
         status: 'idle' as const,
-        message: 'Ollama URL을 입력하세요.',
+        message: t('ollama.enterUrl'),
         requestId: 0,
       },
       review: {
@@ -39,10 +40,10 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         mode: persisted?.mode ?? 'working',
         baseBranch: persisted?.baseBranch ?? initial.baseBranch,
         status: 'idle' as const,
-        statusMessage: '리뷰할 준비가 되었습니다.',
+        statusMessage: t('review.ready'),
         diffStats: emptyDiffStats(maxDiffChars),
         diffStatsStatus: 'idle' as const,
-        diffStatsMessage: '변경 범위를 계산하는 중...',
+        diffStatsMessage: t('review.scopeCalculating'),
         diffStatsRequestId: 0,
       },
       settings: {
@@ -51,7 +52,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
           persisted?.maxDiffCharsDraft ?? persisted?.maxDiffChars ?? initial.maxDiffChars,
         setupComplete: initial.setupComplete,
         status: 'idle' as const,
-        message: '한 번의 리뷰에 전달할 필터링된 Diff 크기를 설정합니다.',
+        message: t('settings.diffDescription'),
       },
     },
   });

@@ -9,6 +9,7 @@ import OllamaFields from '../../ollama/components/OllamaFields.js';
 import { workspaceChanged } from '../../review/reviewSlice.js';
 import { draftMaxDiffCharsChanged, settingsSaveRequested } from '../settingsSlice.js';
 import styles from './SettingsTab.module.css';
+import { t } from '../../../../localization.js';
 
 const PRESETS = [60_000, 120_000, 240_000];
 
@@ -44,26 +45,26 @@ const SettingsTab = (): React.JSX.Element => {
           AI
         </span>
         <div>
-          <h2>{settings.setupComplete ? '리뷰 환경 설정' : 'Codivew 시작하기'}</h2>
-          <p>리뷰할 프로젝트와 로컬 AI 모델을 선택합니다.</p>
+          <h2>{settings.setupComplete ? t('settings.title') : t('settings.getStarted')}</h2>
+          <p>{t('settings.description')}</p>
         </div>
       </div>
 
-      <Field label="기본 워크스페이스" htmlFor="workspace" className={styles.field}>
+      <Field label={t('settings.workspace')} htmlFor="workspace" className={styles.field}>
         <select
           id="workspace"
           disabled={!hasWorkspace || settings.status === 'saving'}
           value={review.workspaceIndex}
           onChange={(event) => dispatch(workspaceChanged(Number(event.target.value)))}
         >
-          {!hasWorkspace && <option value={-1}>열린 워크스페이스가 없습니다</option>}
+          {!hasWorkspace && <option value={-1}>{t('settings.noOpenWorkspace')}</option>}
           {review.workspaces.map((workspace) => (
             <option key={workspace.index} value={workspace.index}>
               {workspace.name} · {workspace.path}
             </option>
           ))}
         </select>
-        <div className={styles.hint}>리뷰 화면에서 기본으로 사용할 프로젝트입니다.</div>
+        <div className={styles.hint}>{t('settings.workspaceHint')}</div>
       </Field>
 
       <OllamaFields disabled={settings.status === 'saving'} fieldClassName={styles.field} />
@@ -71,11 +72,11 @@ const SettingsTab = (): React.JSX.Element => {
       <div className={styles.divider} />
 
       <div className={styles.sectionTitle}>
-        <h3>리뷰 크기 제한</h3>
-        <p>큰 Diff로 인한 컨텍스트 초과와 응답 지연을 방지합니다.</p>
+        <h3>{t('settings.sizeTitle')}</h3>
+        <p>{t('settings.sizeDescription')}</p>
       </div>
 
-      <Field label="최대 Diff 문자 수" htmlFor="max-diff-chars" className={styles.field}>
+      <Field label={t('settings.maxDiff')} htmlFor="max-diff-chars" className={styles.field}>
         <input
           id="max-diff-chars"
           type="number"
@@ -85,10 +86,10 @@ const SettingsTab = (): React.JSX.Element => {
           onChange={(event) => dispatch(draftMaxDiffCharsChanged(Number(event.target.value)))}
           required
         />
-        <div className={styles.hint}>필터링이 끝난 Diff의 문자 수를 기준으로 계산합니다.</div>
+        <div className={styles.hint}>{t('settings.maxDiffHint')}</div>
       </Field>
 
-      <div className={styles.presets} aria-label="Diff 크기 프리셋">
+      <div className={styles.presets} aria-label={t('settings.presets')}>
         {PRESETS.map((value) => (
           <button
             key={value}
@@ -96,7 +97,7 @@ const SettingsTab = (): React.JSX.Element => {
             className={settings.draftMaxDiffChars === value ? styles.selected : undefined}
             onClick={() => dispatch(draftMaxDiffCharsChanged(value))}
           >
-            {formatNumber(value)}자
+            {t('targets.characters', { count: formatNumber(value) })}
           </button>
         ))}
       </div>
@@ -112,10 +113,10 @@ const SettingsTab = (): React.JSX.Element => {
         }
       >
         {settings.status === 'saving'
-          ? '저장 중...'
+          ? t('settings.saving')
           : settings.setupComplete
-            ? '설정 저장'
-            : '설정 저장하고 시작'}
+            ? t('settings.save')
+            : t('settings.saveAndStart')}
       </button>
     </form>
   );

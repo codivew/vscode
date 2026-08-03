@@ -12,6 +12,7 @@ import {
   type RunReviewResult,
 } from 'codivew/core';
 import { progressMessage, ReviewController } from './review-controller.js';
+import { getLocale, t } from './localization.js';
 import type {
   DiffStats,
   ExtensionMessage,
@@ -82,26 +83,26 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
     if (folder === undefined) {
-      this.postSettings('error', '기본 워크스페이스를 선택하세요.');
+      this.postSettings('error', t('host.defaultWorkspace'));
       return;
     }
     if (ollamaUrl === undefined) {
-      this.postSettings('error', '올바른 HTTP 또는 HTTPS Ollama URL을 입력하세요.');
+      this.postSettings('error', t('ollama.invalidUrl'));
       return;
     }
     if (model === undefined) {
-      this.postSettings('error', '사용할 Ollama 모델을 선택하세요.');
+      this.postSettings('error', t('host.selectModel'));
       return;
     }
     if (maxDiffChars === undefined || maxDiffChars < 1_000) {
-      this.postSettings('error', '최대 Diff 크기는 1,000자 이상의 정수여야 합니다.');
+      this.postSettings('error', t('host.maxDiffInvalid'));
       return;
     }
     const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
     await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
     await configuration.update('model', model, vscode.ConfigurationTarget.Global);
     await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
-    this.postSettings('saved', '리뷰 환경 설정을 저장했습니다.', maxDiffChars, true);
+    this.postSettings('saved', t('host.settingsSaved'), maxDiffChars, true);
   }
 
   private async loadDiffStats(message: LoadDiffStatsMessage): Promise<void> {
@@ -115,11 +116,11 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const baseBranch = stringValue(message.baseBranch);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
     if (folder === undefined || mode === undefined || maxDiffChars === undefined) {
-      this.postDiffStats(requestId, 'error', '리뷰 범위를 확인할 수 없습니다.');
+      this.postDiffStats(requestId, 'error', t('host.scopeUnavailable'));
       return;
     }
     if (mode === ReviewMode.BRANCH && baseBranch === undefined) {
-      this.postDiffStats(requestId, 'error', '기준 브랜치를 입력하세요.');
+      this.postDiffStats(requestId, 'error', t('review.enterBaseBranch'));
       return;
     }
 
@@ -169,7 +170,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
 
     const ollamaUrl = validHttpUrl(message.ollamaUrl);
     if (ollamaUrl === undefined) {
-      this.postModels(requestId, 'error', [], '올바른 Ollama URL을 입력하세요.');
+      this.postModels(requestId, 'error', [], t('host.invalidOllamaUrl'));
       return;
     }
 
@@ -182,7 +183,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
           requestId,
           'error',
           [],
-          `모델 목록을 불러오지 못했습니다. (HTTP ${response.status})`,
+          t('host.modelsHttpError', { status: response.status }),
         );
         return;
       }
@@ -194,11 +195,11 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
         'loaded',
         models,
         models.length === 0
-          ? 'Ollama에 설치된 모델이 없습니다.'
-          : `${models.length}개 모델을 불러왔습니다.`,
+          ? t('host.noInstalledModels')
+          : t('host.modelsLoaded', { count: models.length }),
       );
     } catch {
-      this.postModels(requestId, 'error', [], `Ollama에 연결할 수 없습니다: ${ollamaUrl}`);
+      this.postModels(requestId, 'error', [], t('host.ollamaConnectionError', { url: ollamaUrl }));
     } finally {
       clearTimeout(timeout);
     }
@@ -209,7 +210,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const workspaceIndex = numberValue(message.workspaceIndex);
     const folder = workspaceIndex === undefined ? undefined : folders[workspaceIndex];
     if (folder === undefined) {
-      this.postState('error', '리뷰할 워크스페이스를 선택하세요.');
+      this.postState('error', t('host.reviewWorkspace'));
       return;
     }
 
@@ -220,30 +221,30 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
     if (mode === undefined) {
-      this.postState('error', '리뷰 범위를 선택하세요.');
+      this.postState('error', t('host.selectScope'));
       return;
     }
     if (ollamaUrl === undefined) {
-      this.postState('error', '올바른 HTTP 또는 HTTPS Ollama URL을 입력하세요.');
+      this.postState('error', t('ollama.invalidUrl'));
       return;
     }
     if (model === undefined) {
-      this.postState('error', '사용할 Ollama 모델명을 입력하세요.');
+      this.postState('error', t('host.enterModel'));
       return;
     }
     if (maxDiffChars === undefined || maxDiffChars < 1_000) {
-      this.postState('error', '최대 Diff 크기는 1,000자 이상의 정수여야 합니다.');
+      this.postState('error', t('host.maxDiffInvalid'));
       return;
     }
     if (mode === ReviewMode.BRANCH && baseBranchValue === undefined) {
-      this.postState('error', 'branch 리뷰에는 기준 브랜치가 필요합니다.');
+      this.postState('error', t('host.branchModeRequired'));
       return;
     }
 
     const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
     await configuration.update('baseBranch', baseBranch, vscode.ConfigurationTarget.Global);
 
-    this.postState('running', '리뷰를 준비하는 중...');
+    this.postState('running', t('host.preparing'));
     await this.controller.run(
       {
         folder,
@@ -258,7 +259,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       {
         onProgress: (stage) => this.postProgress(stage),
         onCompleted: (result) => this.postCompleted(result),
-        onCancelled: () => this.postState('cancelled', '리뷰를 취소했습니다.'),
+        onCancelled: () => this.postState('cancelled', t('host.cancelled')),
         onError: (message) => this.postState('error', message),
       },
     );
@@ -335,7 +336,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const initialState = escapeHtml(JSON.stringify(this.getInitialState()));
 
     return `<!doctype html>
-<html lang="ko">
+<html lang="${getLocale()}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -358,6 +359,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const configuredOllamaUrl = ollamaUrl?.globalValue ?? ollamaUrl?.workspaceValue;
     const configuredModel = model?.globalValue ?? model?.workspaceValue;
     return {
+      locale: getLocale(),
       workspaces: folders.map((folder, index) => ({
         index,
         name: folder.name,
@@ -431,16 +433,16 @@ function escapeHtml(value: string): string {
 
 function verdictLabel(verdict: RunReviewResult['verdict']): string {
   return {
-    approve: '승인',
-    comment: '확인 필요',
-    request_changes: '수정 필요',
+    approve: t('host.approve'),
+    comment: t('host.comment'),
+    request_changes: t('host.requestChanges'),
   }[verdict];
 }
 
 function diffStatsMessage(mode: ReviewMode, baseBranch: string | undefined): string {
   return mode === ReviewMode.BRANCH
-    ? `${baseBranch ?? 'main'} 기준 변경량`
+    ? t('host.branchChanges', { branch: baseBranch ?? 'main' })
     : mode === ReviewMode.STAGED
-      ? 'Staged changes 변경량'
-      : 'Working tree 변경량';
+      ? t('host.stagedChanges')
+      : t('host.workingChanges');
 }

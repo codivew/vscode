@@ -8,6 +8,7 @@ import { persistStore } from './app/persist-store.js';
 import { createAppStore } from './app/store.js';
 import { vscode } from './app/vscode-api.js';
 import type { WebviewInitialState } from './types.js';
+import { setLocale } from '../localization.js';
 
 const root = document.getElementById('root');
 if (root === null) throw new Error('Codivew Webview root element is missing.');
@@ -15,6 +16,8 @@ const encodedState = root.dataset.initialState;
 if (encodedState === undefined) throw new Error('Codivew Webview initial state is missing.');
 
 const initial = JSON.parse(encodedState) as WebviewInitialState;
+setLocale(initial.locale);
+document.documentElement.lang = initial.locale;
 const store = createAppStore(initial, vscode.getState());
 connectExtensionMessages(store);
 persistStore(store);

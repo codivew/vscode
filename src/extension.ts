@@ -1,9 +1,13 @@
 import * as vscode from 'vscode';
-import { ReviewMode } from 'codivew/core';
+import { ReviewMode, setLanguage } from 'codivew/core';
+import { parseLocale, setLocale, t } from './localization.js';
 import { ReviewController } from './review-controller.js';
 import { ReviewViewProvider } from './review-view-provider.js';
 
 export function activate(context: vscode.ExtensionContext): void {
+  const locale = parseLocale(vscode.env.language);
+  setLocale(locale);
+  setLanguage(locale);
   console.info('[Codivew] Extension activated.');
   const diagnostics = vscode.languages.createDiagnosticCollection('codivew');
   const controller = new ReviewController(diagnostics);
@@ -39,11 +43,11 @@ function registerReviewCommand(
     const baseBranch =
       mode === ReviewMode.BRANCH
         ? await vscode.window.showInputBox({
-            title: 'Codivew branch review',
-            prompt: '기준 브랜치를 입력하세요.',
+            title: t('host.branchReview'),
+            prompt: t('host.branchPrompt'),
             value: configuredBaseBranch,
             validateInput: (value) =>
-              value.trim().length === 0 ? '브랜치명이 필요합니다.' : undefined,
+              value.trim().length === 0 ? t('host.branchRequired') : undefined,
           })
         : configuredBaseBranch;
     if (baseBranch === undefined) return;
@@ -64,14 +68,14 @@ function registerReviewCommand(
 async function selectWorkspaceFolder(): Promise<vscode.WorkspaceFolder | undefined> {
   const folders = vscode.workspace.workspaceFolders;
   if (folders === undefined || folders.length === 0) {
-    await vscode.window.showWarningMessage('Codivew를 실행할 워크스페이스 폴더를 여세요.');
+    await vscode.window.showWarningMessage(t('host.openWorkspace'));
     return undefined;
   }
   if (folders.length === 1) return folders[0];
 
   const selected = await vscode.window.showQuickPick(
     folders.map((folder) => ({ label: folder.name, description: folder.uri.fsPath, folder })),
-    { title: 'Codivew를 실행할 워크스페이스 선택' },
+    { title: t('host.selectWorkspace') },
   );
   return selected?.folder;
 }

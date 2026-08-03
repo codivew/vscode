@@ -6,6 +6,7 @@ import Field from '../../../shared/components/Field.js';
 import { validHttpUrl } from '../../../shared/url.js';
 import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../ollamaSlice.js';
 import styles from './OllamaFields.module.css';
+import { t } from '../../../../localization.js';
 
 let nextRequestId = 0;
 
@@ -27,7 +28,7 @@ const OllamaFields = ({
       dispatch(
         modelsInvalidated({
           requestId,
-          message: '올바른 HTTP 또는 HTTPS Ollama URL을 입력하세요.',
+          message: t('ollama.invalidUrl'),
         }),
       );
       return;
@@ -52,10 +53,10 @@ const OllamaFields = ({
           onChange={(event) => dispatch(urlChanged(event.target.value))}
           required
         />
-        <div className={styles.hint}>입력한 주소는 Codivew 사용자 설정에 저장됩니다.</div>
+        <div className={styles.hint}>{t('ollama.urlHint')}</div>
       </Field>
 
-      <Field label="모델" htmlFor="model" className={fieldClassName}>
+      <Field label={t('ollama.model')} htmlFor="model" className={fieldClassName}>
         <select
           id="model"
           value={ollama.model}
@@ -65,7 +66,7 @@ const OllamaFields = ({
         >
           {!hasModels && (
             <option value="">
-              {ollama.status === 'loading' ? '모델 조회 중...' : '선택 가능한 모델이 없습니다'}
+              {ollama.status === 'loading' ? t('ollama.loading') : t('ollama.none')}
             </option>
           )}
           {ollama.models.map((name) => (

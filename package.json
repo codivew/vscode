@@ -1,7 +1,7 @@
 {
   "name": "codivew-vscode",
   "displayName": "Codivew",
-  "description": "Review Git changes with Codivew and a local Ollama model.",
+  "description": "%codivew.description%",
   "version": "0.1.0",
   "publisher": "knsan189",
   "license": "MIT",
@@ -34,19 +34,19 @@
     "commands": [
       {
         "command": "codivew.reviewWorking",
-        "title": "Codivew: Review Working Tree"
+        "title": "%command.reviewWorking%"
       },
       {
         "command": "codivew.reviewStaged",
-        "title": "Codivew: Review Staged Changes"
+        "title": "%command.reviewStaged%"
       },
       {
         "command": "codivew.reviewBranch",
-        "title": "Codivew: Review Branch Changes"
+        "title": "%command.reviewBranch%"
       },
       {
         "command": "codivew.openLatestReport",
-        "title": "Codivew: Open Latest Report",
+        "title": "%command.openLatestReport%",
         "icon": "$(open-preview)"
       }
     ],
@@ -64,7 +64,7 @@
         {
           "type": "webview",
           "id": "codivew.reviewView",
-          "name": "Code Review"
+          "name": "%view.codeReview%"
         }
       ]
     },
@@ -83,17 +83,17 @@
         "codivew.ollamaUrl": {
           "type": "string",
           "default": "http://localhost:11434",
-          "description": "Ollama server URL used for code reviews."
+          "description": "%config.ollamaUrl%"
         },
         "codivew.model": {
           "type": "string",
           "default": "qwen3.6:35b-a3b-coding-mxfp8",
-          "description": "Ollama model used for code reviews."
+          "description": "%config.model%"
         },
         "codivew.baseBranch": {
           "type": "string",
           "default": "main",
-          "description": "Default base branch for branch reviews."
+          "description": "%config.baseBranch%"
         },
         "codivew.projectContext": {
           "type": "array",
@@ -101,13 +101,13 @@
             "type": "string"
           },
           "default": [],
-          "description": "Project context included in every review prompt."
+          "description": "%config.projectContext%"
         },
         "codivew.maxDiffChars": {
           "type": "integer",
           "default": 120000,
           "minimum": 1000,
-          "description": "Maximum filtered diff size in characters for one review."
+          "description": "%config.maxDiffChars%"
         }
       }
     }

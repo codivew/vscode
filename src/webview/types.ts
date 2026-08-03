@@ -87,6 +87,7 @@ export type WebviewMessage =
     };
 
 export type WebviewInitialState = {
+  locale: Locale;
   workspaces: Array<{ index: number; name: string; path: string }>;
   ollamaUrl: string;
   model: string;
@@ -94,3 +95,4 @@ export type WebviewInitialState = {
   maxDiffChars: number;
   setupComplete: boolean;
 };
+import type { Locale } from '../localization.js';

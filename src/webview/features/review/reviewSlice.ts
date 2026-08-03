@@ -5,6 +5,7 @@ import type {
   ReviewStatus,
   WebviewInitialState,
 } from '../../types.js';
+import { t } from '../../../localization.js';
 
 export type DiffStatsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
@@ -38,10 +39,10 @@ const initialState: ReviewState = {
   mode: 'working',
   baseBranch: 'main',
   status: 'idle',
-  statusMessage: '리뷰할 준비가 되었습니다.',
+  statusMessage: t('review.ready'),
   diffStats: emptyDiffStats(120_000),
   diffStatsStatus: 'idle',
-  diffStatsMessage: '변경 범위를 계산하는 중...',
+  diffStatsMessage: t('review.scopeCalculating'),
   diffStatsRequestId: 0,
 };
 
@@ -70,7 +71,7 @@ export const reviewSlice = createSlice({
     diffStatsRequested(state, action: PayloadAction<{ requestId: number; maxDiffChars: number }>) {
       state.diffStats = emptyDiffStats(action.payload.maxDiffChars);
       state.diffStatsStatus = 'loading';
-      state.diffStatsMessage = 'Git 변경량을 계산하는 중...';
+      state.diffStatsMessage = t('review.gitCalculating');
       state.diffStatsRequestId = action.payload.requestId;
     },
     diffStatsReceived(

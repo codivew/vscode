@@ -12,6 +12,7 @@ import {
 } from '../reviewSlice.js';
 import ReviewTargets from './ReviewTargets.js';
 import styles from './ReviewTab.module.css';
+import { t } from '../../../../localization.js';
 
 let nextStatsRequestId = 0;
 
@@ -32,7 +33,7 @@ const ReviewTab = (): React.JSX.Element => {
       dispatch(
         diffStatsInvalidated({
           requestId,
-          message: '워크스페이스를 선택하세요.',
+          message: t('review.selectWorkspace'),
           maxDiffChars,
         }),
       );
@@ -42,7 +43,7 @@ const ReviewTab = (): React.JSX.Element => {
       dispatch(
         diffStatsInvalidated({
           requestId,
-          message: '기준 브랜치를 입력하세요.',
+          message: t('review.enterBaseBranch'),
           maxDiffChars,
         }),
       );
@@ -78,11 +79,11 @@ const ReviewTab = (): React.JSX.Element => {
 
   return (
     <form className={styles.card} onSubmit={submit}>
-      <section className={styles.reviewEnvironment} aria-label="현재 리뷰 환경">
+      <section className={styles.reviewEnvironment} aria-label={t('review.environment')}>
         <div>
-          <span>현재 리뷰 환경</span>
-          <strong>{workspace?.name ?? '워크스페이스 없음'}</strong>
-          <small>{ollama.model || '모델 미설정'}</small>
+          <span>{t('review.environment')}</span>
+          <strong>{workspace?.name ?? t('review.noWorkspace')}</strong>
+          <small>{ollama.model || t('review.noModel')}</small>
         </div>
         <button
           className={styles.textButton}
@@ -90,11 +91,11 @@ const ReviewTab = (): React.JSX.Element => {
           disabled={running}
           onClick={() => dispatch(tabChanged('settings'))}
         >
-          변경
+          {t('review.change')}
         </button>
       </section>
 
-      <Field label="리뷰 범위" htmlFor="mode">
+      <Field label={t('review.scope')} htmlFor="mode">
         <select
           id="mode"
           value={review.mode}
@@ -107,7 +108,7 @@ const ReviewTab = (): React.JSX.Element => {
         </select>
       </Field>
 
-      <Field label="기준 브랜치" htmlFor="base-branch">
+      <Field label={t('review.baseBranch')} htmlFor="base-branch">
         <input
           id="base-branch"
           value={review.baseBranch}
@@ -131,7 +132,7 @@ const ReviewTab = (): React.JSX.Element => {
             running
           }
         >
-          리뷰 시작
+          {t('review.start')}
         </button>
         {running && (
           <button
@@ -139,7 +140,7 @@ const ReviewTab = (): React.JSX.Element => {
             type="button"
             onClick={() => vscode.postMessage({ type: 'cancel' })}
           >
-            취소
+            {t('review.cancel')}
           </button>
         )}
       </div>
@@ -151,16 +152,16 @@ const ReviewTab = (): React.JSX.Element => {
       {review.result !== undefined && (
         <section className={styles.result}>
           <div className={styles.metrics}>
-            <Metric value={review.result.verdict} label="판정" />
-            <Metric value={review.result.reviewedFileCount} label="파일" />
-            <Metric value={review.result.issueCount} label="항목" />
+            <Metric value={review.result.verdict} label={t('review.verdict')} />
+            <Metric value={review.result.reviewedFileCount} label={t('review.files')} />
+            <Metric value={review.result.issueCount} label={t('review.items')} />
           </div>
           <button
             className={`${styles.secondary} ${styles.reportButton}`}
             type="button"
             onClick={() => vscode.postMessage({ type: 'openReport' })}
           >
-            전체 리포트 열기
+            {t('review.openReport')}
           </button>
         </section>
       )}

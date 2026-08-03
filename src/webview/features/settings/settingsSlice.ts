@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { t } from '../../../localization.js';
 
 export type SettingsStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -15,7 +16,7 @@ const initialState: SettingsState = {
   draftMaxDiffChars: 120_000,
   setupComplete: false,
   status: 'idle',
-  message: '한 번의 리뷰에 전달할 필터링된 Diff 크기를 설정합니다.',
+  message: t('settings.diffDescription'),
 };
 
 export const settingsSlice = createSlice({
@@ -25,11 +26,11 @@ export const settingsSlice = createSlice({
     draftMaxDiffCharsChanged(state, action: PayloadAction<number>) {
       state.draftMaxDiffChars = action.payload;
       state.status = 'idle';
-      state.message = '변경된 값을 저장하면 다음 리뷰부터 적용됩니다.';
+      state.message = t('settings.changed');
     },
     settingsSaveRequested(state) {
       state.status = 'saving';
-      state.message = '설정을 저장하는 중...';
+      state.message = t('settings.savingStatus');
     },
     settingsReceived(
       state,

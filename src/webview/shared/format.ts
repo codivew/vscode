@@ -1,3 +1,5 @@
+import { getLocale } from '../../localization.js';
+
 export function formatNumber(value: number): string {
-  return value.toLocaleString('ko-KR');
+  return value.toLocaleString(getLocale());
 }
