@@ -42,6 +42,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         status: 'idle' as const,
         statusMessage: t('review.ready'),
         diffStats: emptyDiffStats(maxDiffChars),
+        selectedFiles: [],
         diffStatsStatus: 'idle' as const,
         diffStatsMessage: t('review.scopeCalculating'),
         diffStatsRequestId: 0,

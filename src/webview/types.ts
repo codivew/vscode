@@ -6,6 +6,7 @@ export type ReviewMessage = {
   ollamaUrl: unknown;
   model: unknown;
   maxDiffChars: unknown;
+  selectedFiles: unknown;
 };
 
 export type LoadModelsMessage = {
@@ -41,13 +42,21 @@ export type ExtensionMessage =
   | { type: 'openReport' };
 
 export type DiffStats = {
-  files: string[];
+  files: DiffFileStats[];
   fileCount: number;
   additions: number;
   deletions: number;
   changedLineCount: number;
   filteredCharCount: number;
   maxDiffChars: number;
+};
+
+export type DiffFileStats = {
+  path: string;
+  additions: number;
+  deletions: number;
+  changedLineCount: number;
+  filteredCharCount: number;
 };
 
 export type ReviewResultSummary = {

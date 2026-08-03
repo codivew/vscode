@@ -36,6 +36,17 @@ const messages = {
   'targets.error': ['Could not load changed files.', '변경 파일을 불러오지 못했습니다.'],
   'targets.empty': ['There are no changed files to review.', '리뷰할 변경 파일이 없습니다.'],
   'targets.fileCount': ['{count} files', '{count}개 파일'],
+  'targets.singleFile': ['1 file', '1개 파일'],
+  'targets.selectedCount': [
+    '{selected} of {total} files selected',
+    '전체 {total}개 중 {selected}개 선택',
+  ],
+  'targets.selectAll': ['Select all', '전체 선택'],
+  'targets.clearAll': ['Clear', '전체 해제'],
+  'targets.noSelection': [
+    'Select at least one file to start a review.',
+    '리뷰를 시작하려면 파일을 하나 이상 선택하세요.',
+  ],
   'targets.lineCount': ['{count} lines changed', '{count}줄 변경'],
   'targets.filteredDiff': ['Filtered Diff', '필터링된 Diff'],
   'targets.characters': ['{count} chars', '{count}자'],
