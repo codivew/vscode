@@ -2,9 +2,9 @@
 import React, { type FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
 import { vscode } from '../../app/vscode-api.js';
-import { Field } from '../../shared/field.js';
+import { Field } from '../../shared/FieldComponent.js';
 import { formatNumber } from '../../shared/format.js';
-import { draftMaxDiffCharsChanged, settingsSaveRequested } from './settings-slice.js';
+import { draftMaxDiffCharsChanged, settingsSaveRequested } from './settingsSlice.js';
 
 const PRESETS = [60_000, 120_000, 240_000];
 

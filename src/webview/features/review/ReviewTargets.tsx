@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import React from 'react';
 import { formatNumber } from '../../shared/format.js';
-import type { ReviewState } from './review-slice.js';
+import type { ReviewState } from './reviewSlice.js';
 
 export function ReviewTargets({
   review,

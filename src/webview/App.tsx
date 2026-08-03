@@ -1,9 +1,9 @@
 /** @jsxImportSource react */
 import React from 'react';
-import { NavigationTabs } from '../features/navigation/navigation-tabs.js';
-import { ReviewTab } from '../features/review/review-tab.js';
-import { SettingsTab } from '../features/settings/settings-tab.js';
-import { useAppSelector } from './hooks.js';
+import { NavigationTabs } from './features/navigation/NavigationTabs.js';
+import { ReviewTab } from './features/review/ReviewTab.js';
+import { SettingsTab } from './features/settings/SettingsTab.js';
+import { useAppSelector } from './app/hooks.js';
 
 export function App(): React.JSX.Element {
   const activeTab = useAppSelector((state) => state.navigation.activeTab);

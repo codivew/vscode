@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
-import { tabChanged, type NavigationTab } from './navigation-slice.js';
+import { tabChanged, type NavigationTab } from './navigationSlice.js';
 
 const TABS: Array<{ id: NavigationTab; label: string }> = [
   { id: 'review', label: '리뷰' },

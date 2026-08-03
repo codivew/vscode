@@ -1,6 +1,6 @@
-import { modelsReceived } from '../features/ollama/ollama-slice.js';
-import { diffStatsReceived, reviewStateReceived } from '../features/review/review-slice.js';
-import { settingsReceived } from '../features/settings/settings-slice.js';
+import { modelsReceived } from '../features/ollama/ollamaSlice.js';
+import { diffStatsReceived, reviewStateReceived } from '../features/review/reviewSlice.js';
+import { settingsReceived } from '../features/settings/settingsSlice.js';
 import type { WebviewMessage } from '../protocol.js';
 import type { AppStore } from './store.js';
 

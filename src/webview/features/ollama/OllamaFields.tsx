@@ -2,9 +2,9 @@
 import React, { useEffect } from 'react';
 import { vscode } from '../../app/vscode-api.js';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
-import { Field } from '../../shared/field.js';
+import { Field } from '../../shared/FieldComponent.js';
 import { validHttpUrl } from '../../shared/url.js';
-import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from './ollama-slice.js';
+import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from './ollamaSlice.js';
 
 let nextRequestId = 0;
 

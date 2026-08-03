@@ -2,16 +2,16 @@
 import React, { useEffect, type FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
 import { vscode } from '../../app/vscode-api.js';
-import { Field } from '../../shared/field.js';
-import { OllamaFields } from '../ollama/ollama-fields.js';
+import { Field } from '../../shared/FieldComponent.js';
+import { OllamaFields } from '../ollama/OllamaFields.js';
 import {
   baseBranchChanged,
   diffStatsInvalidated,
   diffStatsRequested,
   modeChanged,
   workspaceChanged,
-} from './review-slice.js';
-import { ReviewTargets } from './review-targets.js';
+} from './reviewSlice.js';
+import { ReviewTargets } from './ReviewTargets.js';
 
 let nextStatsRequestId = 0;
 

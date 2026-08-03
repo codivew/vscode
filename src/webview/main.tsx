@@ -2,7 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { App } from './app/app.js';
+import { App } from './App.js';
 import { connectExtensionMessages } from './app/extension-messages.js';
 import { persistStore } from './app/persist-store.js';
 import { createAppStore } from './app/store.js';
