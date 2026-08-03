@@ -6,7 +6,6 @@ node_modules/**
 .vscode/**
 .github/**
 media/codivew-icon-*.png
-!media/codivew-icon-24.png
 !media/codivew-icon-128.png
 **/*.map
 .gitignore
