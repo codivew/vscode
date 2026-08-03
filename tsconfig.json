@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "react-jsx",
+    "declaration": false,
+    "noEmit": true,
+    "target": "ES2022",
+    "incremental": false,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "vscode", "react", "react-dom"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}

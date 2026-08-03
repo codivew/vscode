@@ -1,0 +1,11 @@
+src/**
+test/**
+tsconfig.json
+esbuild.mjs
+node_modules/**
+**/*.map
+.gitignore
+.gitattributes
+.prettierrc
+eslint.config.mjs
+package-lock.json
