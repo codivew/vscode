@@ -3,6 +3,10 @@ test/**
 tsconfig.json
 esbuild.mjs
 node_modules/**
+.vscode/**
+media/codivew-icon-*.png
+!media/codivew-icon-24.png
+!media/codivew-icon-128.png
 **/*.map
 .gitignore
 .gitattributes

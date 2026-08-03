@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "publisher": "knsan189",
   "license": "MIT",
+  "icon": "media/codivew-icon-128.png",
   "private": true,
   "type": "module",
   "repository": {
@@ -54,7 +55,7 @@
         {
           "id": "codivew",
           "title": "Codivew",
-          "icon": "media/codivew.svg"
+          "icon": "media/codivew-icon-24.png"
         }
       ]
     },
