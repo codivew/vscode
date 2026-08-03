@@ -8,7 +8,7 @@ const TABS: Array<{ id: NavigationTab; label: string }> = [
   { id: 'settings', label: '설정' },
 ];
 
-export function NavigationTabs(): React.JSX.Element {
+const NavigationTabs = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const activeTab = useAppSelector((state) => state.navigation.activeTab);
   return (
@@ -27,4 +27,6 @@ export function NavigationTabs(): React.JSX.Element {
       ))}
     </nav>
   );
-}
+};
+
+export default NavigationTabs;

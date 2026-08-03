@@ -2,8 +2,8 @@
 import React, { useEffect, type FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
 import { vscode } from '../../app/vscode-api.js';
-import { Field } from '../../shared/FieldComponent.js';
-import { OllamaFields } from '../ollama/OllamaFields.js';
+import Field from '../../shared/Field.js';
+import OllamaFields from '../ollama/OllamaFields.js';
 import {
   baseBranchChanged,
   diffStatsInvalidated,
@@ -11,11 +11,11 @@ import {
   modeChanged,
   workspaceChanged,
 } from './reviewSlice.js';
-import { ReviewTargets } from './ReviewTargets.js';
+import ReviewTargets from './ReviewTargets.js';
 
 let nextStatsRequestId = 0;
 
-export function ReviewTab(): React.JSX.Element {
+const ReviewTab = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const review = useAppSelector((state) => state.review);
   const ollama = useAppSelector((state) => state.ollama);
@@ -167,13 +167,15 @@ export function ReviewTab(): React.JSX.Element {
       )}
     </form>
   );
-}
+};
 
-function Metric({ value, label }: { value: string | number; label: string }): React.JSX.Element {
+const Metric = ({ value, label }: { value: string | number; label: string }): React.JSX.Element => {
   return (
     <div className="metric">
       <strong>{value}</strong>
       <span>{label}</span>
     </div>
   );
-}
+};
+
+export default ReviewTab;

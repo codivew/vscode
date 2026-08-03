@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import React from 'react';
 
-export function Field({
+const Field = ({
   label,
   htmlFor,
   children,
@@ -9,11 +9,13 @@ export function Field({
   label: string;
   htmlFor: string;
   children: React.ReactNode;
-}): React.JSX.Element {
+}): React.JSX.Element => {
   return (
     <div className="field">
       <label htmlFor={htmlFor}>{label}</label>
       {children}
     </div>
   );
-}
+};
+
+export default Field;

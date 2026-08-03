@@ -1,11 +1,11 @@
 /** @jsxImportSource react */
 import React from 'react';
-import { NavigationTabs } from './features/navigation/NavigationTabs.js';
-import { ReviewTab } from './features/review/ReviewTab.js';
-import { SettingsTab } from './features/settings/SettingsTab.js';
+import NavigationTabs from './features/navigation/NavigationTabs.js';
+import ReviewTab from './features/review/ReviewTab.js';
+import SettingsTab from './features/settings/SettingsTab.js';
 import { useAppSelector } from './app/hooks.js';
 
-export function App(): React.JSX.Element {
+const App = (): React.JSX.Element => {
   const activeTab = useAppSelector((state) => state.navigation.activeTab);
   return (
     <main className="review-view">
@@ -18,4 +18,6 @@ export function App(): React.JSX.Element {
       {activeTab === 'review' ? <ReviewTab /> : <SettingsTab />}
     </main>
   );
-}
+};
+
+export default App;

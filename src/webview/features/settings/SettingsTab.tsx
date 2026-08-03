@@ -2,13 +2,13 @@
 import React, { type FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
 import { vscode } from '../../app/vscode-api.js';
-import { Field } from '../../shared/FieldComponent.js';
+import Field from '../../shared/Field.js';
 import { formatNumber } from '../../shared/format.js';
 import { draftMaxDiffCharsChanged, settingsSaveRequested } from './settingsSlice.js';
 
 const PRESETS = [60_000, 120_000, 240_000];
 
-export function SettingsTab(): React.JSX.Element {
+const SettingsTab = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const settings = useAppSelector((state) => state.settings);
 
@@ -73,4 +73,6 @@ export function SettingsTab(): React.JSX.Element {
       </button>
     </form>
   );
-}
+};
+
+export default SettingsTab;

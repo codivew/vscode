@@ -3,11 +3,11 @@ import React from 'react';
 import { formatNumber } from '../../shared/format.js';
 import type { ReviewState } from './reviewSlice.js';
 
-export function ReviewTargets({
+const ReviewTargets = ({
   review,
 }: {
   review: Pick<ReviewState, 'diffStats' | 'diffStatsStatus' | 'diffStatsMessage'>;
-}): React.JSX.Element {
+}): React.JSX.Element => {
   const { diffStats, diffStatsStatus, diffStatsMessage } = review;
   const diffTooLarge = diffStats.filteredCharCount > diffStats.maxDiffChars;
   return (
@@ -49,15 +49,15 @@ export function ReviewTargets({
       )}
     </section>
   );
-}
+};
 
-function DiffSize({
+const DiffSize = ({
   stats,
   tooLarge,
 }: {
   stats: ReviewState['diffStats'];
   tooLarge: boolean;
-}): React.JSX.Element {
+}): React.JSX.Element => {
   return (
     <div className="diff-size">
       <div className="diff-size-label">
@@ -88,9 +88,9 @@ function DiffSize({
       )}
     </div>
   );
-}
+};
 
-function FileRow({ path }: { path: string }): React.JSX.Element {
+const FileRow = ({ path }: { path: string }): React.JSX.Element => {
   const separator = path.lastIndexOf('/');
   const directory = separator < 0 ? '' : path.slice(0, separator);
   const name = separator < 0 ? path : path.slice(separator + 1);
@@ -106,4 +106,6 @@ function FileRow({ path }: { path: string }): React.JSX.Element {
       </span>
     </li>
   );
-}
+};
+
+export default ReviewTargets;

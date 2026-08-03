@@ -2,13 +2,13 @@
 import React, { useEffect } from 'react';
 import { vscode } from '../../app/vscode-api.js';
 import { useAppDispatch, useAppSelector } from '../../app/hooks.js';
-import { Field } from '../../shared/FieldComponent.js';
+import Field from '../../shared/Field.js';
 import { validHttpUrl } from '../../shared/url.js';
 import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from './ollamaSlice.js';
 
 let nextRequestId = 0;
 
-export function OllamaFields({ disabled }: { disabled: boolean }): React.JSX.Element {
+const OllamaFields = ({ disabled }: { disabled: boolean }): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const ollama = useAppSelector((state) => state.ollama);
   const hasModels = ollama.status === 'loaded' && ollama.models.length > 0;
@@ -73,4 +73,6 @@ export function OllamaFields({ disabled }: { disabled: boolean }): React.JSX.Ele
       </Field>
     </>
   );
-}
+};
+
+export default OllamaFields;
