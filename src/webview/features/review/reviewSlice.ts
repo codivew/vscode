@@ -4,7 +4,7 @@ import type {
   ReviewResultSummary,
   ReviewStatus,
   WebviewInitialState,
-} from '../../protocol.js';
+} from '../../types.js';
 
 export type DiffStatsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 

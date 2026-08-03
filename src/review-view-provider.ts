@@ -20,7 +20,7 @@ import type {
   ReviewMessage,
   SaveSettingsMessage,
   WebviewInitialState,
-} from './webview/protocol.js';
+} from './webview/types.js';
 
 type OllamaTagsResponse = {
   models?: unknown;

@@ -1,18 +1,12 @@
 import { combineSlices, configureStore, type EnhancedStore } from '@reduxjs/toolkit';
-import { navigationSlice, type NavigationState } from '../features/navigation/navigationSlice.js';
-import { ollamaSlice, type OllamaState } from '../features/ollama/ollamaSlice.js';
-import { emptyDiffStats, reviewSlice, type ReviewState } from '../features/review/reviewSlice.js';
-import { settingsSlice, type SettingsState } from '../features/settings/settingsSlice.js';
-import type { WebviewInitialState } from '../protocol.js';
+import { navigationSlice } from '../features/navigation/navigationSlice.js';
+import { ollamaSlice } from '../features/ollama/ollamaSlice.js';
+import { emptyDiffStats, reviewSlice } from '../features/review/reviewSlice.js';
+import { settingsSlice } from '../features/settings/settingsSlice.js';
+import type { WebviewInitialState } from '../types.js';
 import type { PersistedState } from './vscode-api.js';
 
-export type RootState = {
-  navigation: NavigationState;
-  ollama: OllamaState;
-  review: ReviewState;
-  settings: SettingsState;
-};
-
+export type RootState = ReturnType<typeof combinedReducer>;
 export type AppStore = EnhancedStore<RootState>;
 
 const combinedReducer = combineSlices(navigationSlice, ollamaSlice, reviewSlice, settingsSlice);

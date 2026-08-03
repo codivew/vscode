@@ -7,7 +7,7 @@ import { connectExtensionMessages } from './app/extension-messages.js';
 import { persistStore } from './app/persist-store.js';
 import { createAppStore } from './app/store.js';
 import { vscode } from './app/vscode-api.js';
-import type { WebviewInitialState } from './protocol.js';
+import type { WebviewInitialState } from './types.js';
 import './review.css';
 
 const root = document.getElementById('root');
