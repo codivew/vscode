@@ -13,6 +13,7 @@ import {
   type RunReviewResult,
 } from 'codivew/core';
 import { progressMessage, ReviewController } from './review-controller.js';
+import { splitDiffFiles } from './diff-files.js';
 import {
   getLocale,
   parseLanguagePreference,
@@ -152,9 +153,14 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
         signal: controller.signal,
       });
       const filtered = new DiffFilterService().filter(input.diff);
+      const files = splitDiffFiles(filtered.diff).map(({ path, diff }) => ({
+        path,
+        ...calculateDiffStats(diff),
+        filteredCharCount: diff.length,
+      }));
       this.postDiffStats(requestId, 'loaded', diffStatsMessage(mode, baseBranch), {
         ...calculateDiffStats(filtered.diff),
-        files: filtered.reviewedFiles,
+        files,
         filteredCharCount: filtered.filteredCharCount,
         maxDiffChars,
       });
@@ -238,6 +244,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const ollamaUrl = validHttpUrl(message.ollamaUrl);
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
+    const selectedFiles = stringArrayValue(message.selectedFiles);
     if (mode === undefined) {
       this.postState('error', t('host.selectScope'));
       return;
@@ -252,6 +259,10 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     }
     if (maxDiffChars === undefined || maxDiffChars < 1_000) {
       this.postState('error', t('host.maxDiffInvalid'));
+      return;
+    }
+    if (selectedFiles === undefined || selectedFiles.length === 0) {
+      this.postState('error', t('targets.noSelection'));
       return;
     }
     if (mode === ReviewMode.BRANCH && baseBranchValue === undefined) {
@@ -271,6 +282,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
         ollamaUrl,
         model,
         maxDiffChars,
+        selectedFiles,
         projectContext: configuration.get<string[]>('projectContext', []),
         openReport: false,
       },
@@ -404,6 +416,13 @@ function stringValue(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
   return trimmed.length === 0 ? undefined : trimmed;
+}
+
+function stringArrayValue(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const values = value.map(stringValue);
+  if (values.some((item) => item === undefined)) return undefined;
+  return [...new Set(values as string[])];
 }
 
 function numberValue(value: unknown): number | undefined {

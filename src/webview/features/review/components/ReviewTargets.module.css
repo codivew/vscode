@@ -47,6 +47,36 @@
   font-size: 11px;
 }
 
+.selectionControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 10px;
+}
+
+.selectionControls > div {
+  display: flex;
+  gap: 4px;
+}
+
+.selectionControls button {
+  min-height: 24px;
+  padding: 2px 7px;
+  border: 1px solid var(--vscode-widget-border);
+  color: var(--vscode-foreground);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.selectionControls button:hover:not(:disabled) {
+  border-color: var(--vscode-focusBorder);
+  background: var(--vscode-list-hoverBackground);
+}
+
 .fileSummary strong {
   color: var(--vscode-foreground);
   font-size: 12px;
@@ -78,16 +108,38 @@
 }
 
 .fileList li {
-  display: flex;
-  align-items: center;
-  gap: 7px;
   min-width: 0;
-  padding: 5px 6px;
   border-radius: 3px;
 }
 
 .fileList li:hover {
   background: var(--vscode-list-hoverBackground);
+}
+
+.fileList li[data-selected='false'] {
+  opacity: 0.62;
+}
+
+.fileList label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 6px;
+  cursor: pointer;
+}
+
+.fileList input {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--vscode-focusBorder);
+}
+
+.fileList input:disabled + .fileIcon,
+.fileList label:has(input:disabled) {
+  cursor: default;
 }
 
 .fileIcon {
@@ -128,6 +180,12 @@
 
 .error {
   color: var(--vscode-errorForeground);
+}
+
+.selectionError {
+  margin-top: 7px;
+  color: var(--vscode-errorForeground);
+  font-size: 10px;
 }
 
 .diffSize {

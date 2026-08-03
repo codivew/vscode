@@ -13,6 +13,7 @@ select a fixed language from the **Settings** tab.
 - Review working tree, staged, or branch changes.
 - Select any model installed in your local Ollama instance.
 - Preview changed files, lines, and filtered Diff size before starting.
+- Select the changed files to include in each review with live Diff statistics.
 - Limit large reviews to avoid context overflow and slow responses.
 - View findings directly in the VS Code Problems panel.
 - Open a complete HTML report after each review.

@@ -74,6 +74,7 @@ const ReviewTab = (): React.JSX.Element => {
       mode: review.mode,
       baseBranch: review.baseBranch,
       maxDiffChars,
+      selectedFiles: review.selectedFiles,
     });
   };
 
@@ -118,7 +119,7 @@ const ReviewTab = (): React.JSX.Element => {
         />
       </Field>
 
-      <ReviewTargets review={review} />
+      <ReviewTargets review={review} disabled={running} />
 
       <div className={styles.actions}>
         <button
