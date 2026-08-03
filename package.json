@@ -2,7 +2,7 @@
   "name": "codivew-vscode",
   "displayName": "Codivew",
   "description": "%codivew.description%",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "knsan189",
   "license": "MIT",
   "icon": "media/codivew-icon-128.png",
