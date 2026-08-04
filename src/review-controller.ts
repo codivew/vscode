@@ -1,15 +1,26 @@
-import { isAbsolute, relative, resolve } from 'node:path';
+import { basename, isAbsolute, relative, resolve } from 'node:path';
 import * as vscode from 'vscode';
 import {
+  createGitReviewInput,
+  DEFAULT_MAX_DIFF_CHARS,
+  DEFAULT_OLLAMA_MODEL,
+  DEFAULT_OLLAMA_TIMEOUT_MS,
+  DEFAULT_OLLAMA_URL,
+  DiffFilterService,
   ERROR_CODES,
+  HtmlRendererService,
+  OllamaService,
   ReviewError,
+  ReviewMode,
+  ReviewPromptService,
+  ReviewsService,
   runReview,
   type ReviewIssue,
-  type ReviewMode,
   type ReviewProgressStage,
   type RunReviewResult,
 } from 'codivew/core';
 import { t } from './localization.js';
+import { selectDiffFiles } from './diff-files.js';
 
 const DIAGNOSTIC_SOURCE = 'Codivew';
 
@@ -21,6 +32,7 @@ export type ReviewInput = {
   model?: string;
   maxDiffChars?: number;
   projectContext: string[];
+  selectedFiles?: string[];
   openReport: boolean;
 };
 
@@ -54,10 +66,10 @@ export class ReviewController {
           title: t('host.reviewTitle'),
           cancellable: true,
         },
-        async (progress, token) => {
+        async (progress, token): Promise<RunReviewResult> => {
           const cancellation = token.onCancellationRequested(() => controller.abort());
           try {
-            return await runReview({
+            const options = {
               cwd: input.folder.uri.fsPath,
               mode: input.mode,
               baseBranch: input.baseBranch,
@@ -66,11 +78,14 @@ export class ReviewController {
               model: input.model,
               maxDiffChars: input.maxDiffChars,
               signal: controller.signal,
-              onProgress: (stage) => {
+              onProgress: (stage: ReviewProgressStage): void => {
                 progress.report({ message: progressMessage(stage) });
                 hooks.onProgress?.(stage);
               },
-            });
+            };
+            return input.selectedFiles === undefined
+              ? await runReview(options)
+              : await runReviewForFiles(options, input.selectedFiles);
           } finally {
             cancellation.dispose();
           }
@@ -117,6 +132,52 @@ export class ReviewController {
     this.openReport(this.latestResult);
   }
 
+  async openIssue(reviewId: string, issueIndex: number): Promise<void> {
+    const result = this.latestResult;
+    const issue = result?.reviewId === reviewId ? result.json.result.issues[issueIndex] : undefined;
+    if (result === undefined || issue === undefined) {
+      await vscode.window.showWarningMessage(t('host.issueUnavailable'));
+      return;
+    }
+
+    const uri = reviewFileUri(result, issue.file);
+    if (uri === undefined) {
+      await vscode.window.showWarningMessage(t('host.issueUnavailable'));
+      return;
+    }
+
+    try {
+      const document = await vscode.workspace.openTextDocument(uri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+        preserveFocus: false,
+      });
+      const startLine = Math.min(Math.max(0, issue.line - 1), document.lineCount - 1);
+      const endLine = Math.min(
+        Math.max(startLine, (issue.endLine ?? issue.line) - 1),
+        document.lineCount - 1,
+      );
+      const range = new vscode.Range(
+        new vscode.Position(startLine, 0),
+        document.lineAt(endLine).range.end,
+      );
+      editor.selection = new vscode.Selection(range.start, range.end);
+      editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await vscode.window.showErrorMessage(t('host.issueFileError', { message }));
+    }
+  }
+
+  async openLatestIssue(issueIndex: number): Promise<void> {
+    const reviewId = this.latestResult?.reviewId;
+    if (reviewId === undefined) {
+      await vscode.window.showWarningMessage(t('host.issueUnavailable'));
+      return;
+    }
+    await this.openIssue(reviewId, issueIndex);
+  }
+
   private openReport(result: RunReviewResult): void {
     const panel = vscode.window.createWebviewPanel(
       'codivew.reviewReport',
@@ -126,6 +187,58 @@ export class ReviewController {
     );
     panel.webview.html = result.html;
   }
+}
+
+async function runReviewForFiles(
+  options: {
+    cwd: string;
+    mode: ReviewMode;
+    baseBranch: string;
+    projectContext: string[];
+    ollamaUrl?: string;
+    model?: string;
+    maxDiffChars?: number;
+    signal: AbortSignal;
+    onProgress: (stage: ReviewProgressStage) => void;
+  },
+  selectedFiles: string[],
+): Promise<RunReviewResult> {
+  options.onProgress('collecting-diff');
+  const gitInput = await createGitReviewInput(options.cwd, {
+    mode: options.mode,
+    baseBranch: options.baseBranch,
+    signal: options.signal,
+  });
+  const diff = selectDiffFiles(gitInput.diff, selectedFiles);
+  const request = {
+    repository: basename(gitInput.repositoryRoot),
+    baseBranch: options.mode === ReviewMode.BRANCH ? options.baseBranch : undefined,
+    mode: options.mode,
+    commitSha: gitInput.commitSha,
+    projectContext: options.projectContext.length === 0 ? undefined : options.projectContext,
+    diff,
+  };
+
+  options.onProgress('generating-review');
+  const reviews = new ReviewsService(
+    options.maxDiffChars ?? DEFAULT_MAX_DIFF_CHARS,
+    new DiffFilterService(),
+    new ReviewPromptService(),
+    new OllamaService({
+      baseUrl: options.ollamaUrl ?? DEFAULT_OLLAMA_URL,
+      model: options.model ?? DEFAULT_OLLAMA_MODEL,
+      timeoutMs: DEFAULT_OLLAMA_TIMEOUT_MS,
+      signal: options.signal,
+    }),
+    new HtmlRendererService(),
+  );
+  const generated = await reviews.createReview(request);
+  options.onProgress('completed');
+  return {
+    ...generated,
+    repositoryRoot: gitInput.repositoryRoot,
+    request: generated.json.request,
+  };
 }
 
 export function progressMessage(stage: ReviewProgressStage): string {
@@ -143,11 +256,8 @@ function publishDiagnostics(
   const diagnosticsByFile = new Map<string, { uri: vscode.Uri; items: vscode.Diagnostic[] }>();
 
   for (const issue of result.json.result.issues) {
-    const absolutePath = resolve(result.repositoryRoot, issue.file);
-    const relativePath = relative(result.repositoryRoot, absolutePath);
-    if (isAbsolute(relativePath) || relativePath.startsWith('..')) continue;
-
-    const uri = vscode.Uri.file(absolutePath);
+    const uri = reviewFileUri(result, issue.file);
+    if (uri === undefined) continue;
     const entry = diagnosticsByFile.get(uri.toString()) ?? { uri, items: [] };
     entry.items.push(createDiagnostic(issue));
     diagnosticsByFile.set(uri.toString(), entry);
@@ -155,6 +265,13 @@ function publishDiagnostics(
 
   collection.clear();
   collection.set([...diagnosticsByFile.values()].map(({ uri, items }) => [uri, items]));
+}
+
+function reviewFileUri(result: RunReviewResult, file: string): vscode.Uri | undefined {
+  const absolutePath = resolve(result.repositoryRoot, file);
+  const relativePath = relative(result.repositoryRoot, absolutePath);
+  if (isAbsolute(relativePath) || relativePath.startsWith('..')) return undefined;
+  return vscode.Uri.file(absolutePath);
 }
 
 function createDiagnostic(issue: ReviewIssue): vscode.Diagnostic {

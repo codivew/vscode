@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-export type NavigationTab = 'review' | 'settings';
+export type NavigationTab = 'review' | 'results' | 'settings';
 
 export type NavigationState = {
   activeTab: NavigationTab;

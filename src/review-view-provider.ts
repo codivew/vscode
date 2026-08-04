@@ -8,11 +8,21 @@ import {
   ERROR_CODES,
   ReviewError,
   ReviewMode,
+  setLanguage,
   type ReviewProgressStage,
   type RunReviewResult,
 } from 'codivew/core';
 import { progressMessage, ReviewController } from './review-controller.js';
-import { getLocale, t } from './localization.js';
+import { splitDiffFiles } from './diff-files.js';
+import {
+  getLocale,
+  parseLanguagePreference,
+  resolveLocale,
+  setLocale,
+  t,
+  type LanguagePreference,
+  type Locale,
+} from './localization.js';
 import type {
   DiffStats,
   ExtensionMessage,
@@ -60,6 +70,14 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       this.controller.openLatestReport();
       return;
     }
+    if (message.type === 'openIssue') {
+      const reviewId = stringValue(message.reviewId);
+      const issueIndex = numberValue(message.issueIndex);
+      if (reviewId !== undefined && issueIndex !== undefined) {
+        await this.controller.openIssue(reviewId, issueIndex);
+      }
+      return;
+    }
     if (message.type === 'loadModels') {
       await this.loadModels(message);
       return;
@@ -82,6 +100,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const ollamaUrl = validHttpUrl(message.ollamaUrl);
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
+    const language = parseLanguagePreference(message.language);
     if (folder === undefined) {
       this.postSettings('error', t('host.defaultWorkspace'));
       return;
@@ -98,11 +117,19 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       this.postSettings('error', t('host.maxDiffInvalid'));
       return;
     }
+    if (language === undefined) {
+      this.postSettings('error', t('host.invalidLanguage'));
+      return;
+    }
     const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
     await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
     await configuration.update('model', model, vscode.ConfigurationTarget.Global);
     await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
-    this.postSettings('saved', t('host.settingsSaved'), maxDiffChars, true);
+    await configuration.update('language', language, vscode.ConfigurationTarget.Global);
+    const locale = resolveLocale(language, vscode.env.language);
+    setLocale(locale);
+    setLanguage(locale);
+    this.postSettings('saved', t('host.settingsSaved'), maxDiffChars, true, language, locale);
   }
 
   private async loadDiffStats(message: LoadDiffStatsMessage): Promise<void> {
@@ -134,9 +161,14 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
         signal: controller.signal,
       });
       const filtered = new DiffFilterService().filter(input.diff);
+      const files = splitDiffFiles(filtered.diff).map(({ path, diff }) => ({
+        path,
+        ...calculateDiffStats(diff),
+        filteredCharCount: diff.length,
+      }));
       this.postDiffStats(requestId, 'loaded', diffStatsMessage(mode, baseBranch), {
         ...calculateDiffStats(filtered.diff),
-        files: filtered.reviewedFiles,
+        files,
         filteredCharCount: filtered.filteredCharCount,
         maxDiffChars,
       });
@@ -220,6 +252,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const ollamaUrl = validHttpUrl(message.ollamaUrl);
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
+    const selectedFiles = stringArrayValue(message.selectedFiles);
     if (mode === undefined) {
       this.postState('error', t('host.selectScope'));
       return;
@@ -234,6 +267,10 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     }
     if (maxDiffChars === undefined || maxDiffChars < 1_000) {
       this.postState('error', t('host.maxDiffInvalid'));
+      return;
+    }
+    if (selectedFiles === undefined || selectedFiles.length === 0) {
+      this.postState('error', t('targets.noSelection'));
       return;
     }
     if (mode === ReviewMode.BRANCH && baseBranchValue === undefined) {
@@ -253,6 +290,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
         ollamaUrl,
         model,
         maxDiffChars,
+        selectedFiles,
         projectContext: configuration.get<string[]>('projectContext', []),
         openReport: false,
       },
@@ -275,9 +313,14 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       status: 'completed',
       message: result.json.result.summary,
       result: {
+        reviewId: result.reviewId,
         verdict: verdictLabel(result.verdict),
+        risk: result.json.result.risk,
+        summary: result.json.result.summary,
         reviewedFileCount: result.reviewedFileCount,
         issueCount: result.issueCount,
+        tests: result.json.result.tests,
+        issues: result.json.result.issues.map((issue, index) => ({ index, ...issue })),
       },
     });
   }
@@ -315,6 +358,8 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     message: string,
     maxDiffChars?: number,
     setupComplete?: boolean,
+    language?: LanguagePreference,
+    locale?: Locale,
   ): void {
     void this.view?.webview.postMessage({
       type: 'settings',
@@ -322,6 +367,8 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       message,
       ...(maxDiffChars === undefined ? {} : { maxDiffChars }),
       ...(setupComplete === undefined ? {} : { setupComplete }),
+      ...(language === undefined ? {} : { language }),
+      ...(locale === undefined ? {} : { locale }),
     });
   }
 
@@ -358,8 +405,10 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     const model = configuration.inspect<string>('model');
     const configuredOllamaUrl = ollamaUrl?.globalValue ?? ollamaUrl?.workspaceValue;
     const configuredModel = model?.globalValue ?? model?.workspaceValue;
+    const language = parseLanguagePreference(configuration.get('language', 'auto')) ?? 'auto';
     return {
       locale: getLocale(),
+      language,
       workspaces: folders.map((folder, index) => ({
         index,
         name: folder.name,
@@ -380,6 +429,13 @@ function stringValue(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
   return trimmed.length === 0 ? undefined : trimmed;
+}
+
+function stringArrayValue(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const values = value.map(stringValue);
+  if (values.some((item) => item === undefined)) return undefined;
+  return [...new Set(values as string[])];
 }
 
 function numberValue(value: unknown): number | undefined {

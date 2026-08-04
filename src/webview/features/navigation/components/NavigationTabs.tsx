@@ -8,8 +8,10 @@ import { t } from '../../../../localization.js';
 const NavigationTabs = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const activeTab = useAppSelector((state) => state.navigation.activeTab);
+  const hasResult = useAppSelector((state) => state.review.result !== undefined);
   const tabs: Array<{ id: NavigationTab; label: string }> = [
     { id: 'review', label: t('nav.review') },
+    ...(hasResult ? [{ id: 'results' as const, label: t('nav.results') }] : []),
     { id: 'settings', label: t('nav.settings') },
   ];
   return (

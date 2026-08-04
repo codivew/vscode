@@ -6,6 +6,7 @@ export type ReviewMessage = {
   ollamaUrl: unknown;
   model: unknown;
   maxDiffChars: unknown;
+  selectedFiles: unknown;
 };
 
 export type LoadModelsMessage = {
@@ -29,6 +30,7 @@ export type SaveSettingsMessage = {
   ollamaUrl: unknown;
   model: unknown;
   maxDiffChars: unknown;
+  language: unknown;
 };
 
 export type ExtensionMessage =
@@ -37,10 +39,11 @@ export type ExtensionMessage =
   | LoadDiffStatsMessage
   | SaveSettingsMessage
   | { type: 'cancel' }
-  | { type: 'openReport' };
+  | { type: 'openReport' }
+  | { type: 'openIssue'; reviewId: unknown; issueIndex: unknown };
 
 export type DiffStats = {
-  files: string[];
+  files: DiffFileStats[];
   fileCount: number;
   additions: number;
   deletions: number;
@@ -49,10 +52,37 @@ export type DiffStats = {
   maxDiffChars: number;
 };
 
+export type DiffFileStats = {
+  path: string;
+  additions: number;
+  deletions: number;
+  changedLineCount: number;
+  filteredCharCount: number;
+};
+
 export type ReviewResultSummary = {
+  reviewId: string;
   verdict: string;
+  risk: 'low' | 'medium' | 'high';
+  summary: string;
   reviewedFileCount: number;
   issueCount: number;
+  tests: string[];
+  issues: ReviewIssueSummary[];
+};
+
+export type ReviewIssueSummary = {
+  index: number;
+  severity: 'must_fix' | 'should_fix' | 'suggestion';
+  confidence: number;
+  file: string;
+  line: number;
+  endLine?: number;
+  title: string;
+  description: string;
+  impact?: string;
+  suggestion?: string;
+  codeSnippet?: string;
 };
 
 export type ReviewStatus = 'idle' | 'running' | 'completed' | 'cancelled' | 'error';
@@ -84,10 +114,13 @@ export type WebviewMessage =
       message: string;
       maxDiffChars?: number;
       setupComplete?: boolean;
+      language?: LanguagePreference;
+      locale?: Locale;
     };
 
 export type WebviewInitialState = {
   locale: Locale;
+  language: LanguagePreference;
   workspaces: Array<{ index: number; name: string; path: string }>;
   ollamaUrl: string;
   model: string;
@@ -95,4 +128,4 @@ export type WebviewInitialState = {
   maxDiffChars: number;
   setupComplete: boolean;
 };
-import type { Locale } from '../localization.js';
+import type { LanguagePreference, Locale } from '../localization.js';

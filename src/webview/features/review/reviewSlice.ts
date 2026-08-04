@@ -28,6 +28,7 @@ export type ReviewState = {
   statusMessage: string;
   result?: ReviewResultSummary;
   diffStats: DiffStats;
+  selectedFiles: string[];
   diffStatsStatus: DiffStatsStatus;
   diffStatsMessage: string;
   diffStatsRequestId: number;
@@ -41,6 +42,7 @@ const initialState: ReviewState = {
   status: 'idle',
   statusMessage: t('review.ready'),
   diffStats: emptyDiffStats(120_000),
+  selectedFiles: [],
   diffStatsStatus: 'idle',
   diffStatsMessage: t('review.scopeCalculating'),
   diffStatsRequestId: 0,
@@ -64,12 +66,14 @@ export const reviewSlice = createSlice({
       action: PayloadAction<{ requestId: number; message: string; maxDiffChars: number }>,
     ) {
       state.diffStats = emptyDiffStats(action.payload.maxDiffChars);
+      state.selectedFiles = [];
       state.diffStatsStatus = 'idle';
       state.diffStatsMessage = action.payload.message;
       state.diffStatsRequestId = action.payload.requestId;
     },
     diffStatsRequested(state, action: PayloadAction<{ requestId: number; maxDiffChars: number }>) {
       state.diffStats = emptyDiffStats(action.payload.maxDiffChars);
+      state.selectedFiles = [];
       state.diffStatsStatus = 'loading';
       state.diffStatsMessage = t('review.gitCalculating');
       state.diffStatsRequestId = action.payload.requestId;
@@ -86,7 +90,23 @@ export const reviewSlice = createSlice({
       if (action.payload.requestId !== state.diffStatsRequestId) return;
       state.diffStatsStatus = action.payload.status;
       state.diffStatsMessage = action.payload.message;
-      if (action.payload.stats !== undefined) state.diffStats = action.payload.stats;
+      if (action.payload.stats !== undefined) {
+        state.diffStats = action.payload.stats;
+        state.selectedFiles = action.payload.stats.files.map((file) => file.path);
+      }
+    },
+    fileSelectionChanged(state, action: PayloadAction<{ path: string; selected: boolean }>) {
+      const selected = new Set(state.selectedFiles);
+      if (action.payload.selected) selected.add(action.payload.path);
+      else selected.delete(action.payload.path);
+      state.selectedFiles = state.diffStats.files
+        .map((file) => file.path)
+        .filter((path) => selected.has(path));
+      updateSelectedStats(state);
+    },
+    allFilesSelectionChanged(state, action: PayloadAction<boolean>) {
+      state.selectedFiles = action.payload ? state.diffStats.files.map((file) => file.path) : [];
+      updateSelectedStats(state);
     },
     reviewStateReceived(
       state,
@@ -112,5 +132,23 @@ export const {
   diffStatsInvalidated,
   diffStatsRequested,
   diffStatsReceived,
+  fileSelectionChanged,
+  allFilesSelectionChanged,
   reviewStateReceived,
 } = reviewSlice.actions;
+
+function updateSelectedStats(state: ReviewState): void {
+  const selected = new Set(state.selectedFiles);
+  const files = state.diffStats.files.filter((file) => selected.has(file.path));
+  state.diffStats.fileCount = files.length;
+  state.diffStats.additions = files.reduce((total, file) => total + file.additions, 0);
+  state.diffStats.deletions = files.reduce((total, file) => total + file.deletions, 0);
+  state.diffStats.changedLineCount = files.reduce(
+    (total, file) => total + file.changedLineCount,
+    0,
+  );
+  state.diffStats.filteredCharCount = files.reduce(
+    (total, file) => total + file.filteredCharCount,
+    0,
+  );
+}

@@ -1,4 +1,5 @@
 export type Locale = 'en' | 'ko-KR';
+export type LanguagePreference = 'auto' | Locale;
 
 const messages = {
   'app.eyebrow': ['Local AI code review', '로컬 AI 코드 리뷰'],
@@ -12,6 +13,7 @@ const messages = {
   ],
   'nav.menu': ['Codivew menu', 'Codivew 메뉴'],
   'nav.review': ['Review', '리뷰'],
+  'nav.results': ['Results', '결과'],
   'nav.settings': ['Settings', '설정'],
   'review.environment': ['Current review environment', '현재 리뷰 환경'],
   'review.noWorkspace': ['No workspace', '워크스페이스 없음'],
@@ -25,6 +27,37 @@ const messages = {
   'review.files': ['Files', '파일'],
   'review.items': ['Issues', '항목'],
   'review.openReport': ['Open full report', '전체 리포트 열기'],
+  'results.title': ['Review results', '리뷰 결과'],
+  'results.summary': ['Summary', '요약'],
+  'results.verdict': ['Verdict', '판정'],
+  'results.risk': ['Risk', '위험도'],
+  'results.files': ['Files', '파일'],
+  'results.issues': ['Issues', '이슈'],
+  'results.filter': ['Severity filter', '심각도 필터'],
+  'results.allSeverities': ['All severities', '모든 심각도'],
+  'results.mustFix': ['Must fix', '필수 수정'],
+  'results.shouldFix': ['Should fix', '수정 권장'],
+  'results.suggestion': ['Suggestion', '제안'],
+  'results.lowRisk': ['Low', '낮음'],
+  'results.mediumRisk': ['Medium', '보통'],
+  'results.highRisk': ['High', '높음'],
+  'results.noIssues': [
+    'No issues were found in the selected changes.',
+    '선택한 변경사항에서 이슈를 발견하지 못했습니다.',
+  ],
+  'results.noFilteredIssues': [
+    'No issues match this filter.',
+    '이 필터에 해당하는 이슈가 없습니다.',
+  ],
+  'results.line': ['Line {line}', '{line}행'],
+  'results.lineRange': ['Lines {start}-{end}', '{start}-{end}행'],
+  'results.confidence': ['{value}% confidence', '신뢰도 {value}%'],
+  'results.openIssue': ['Open in editor', '편집기에서 열기'],
+  'results.impact': ['Impact', '영향'],
+  'results.fixSuggestion': ['Suggested fix', '수정 제안'],
+  'results.codeSnippet': ['Related code', '관련 코드'],
+  'results.tests': ['Recommended tests', '권장 테스트'],
+  'results.openReport': ['Open full HTML report', '전체 HTML 리포트 열기'],
   'review.selectWorkspace': ['Select a workspace.', '워크스페이스를 선택하세요.'],
   'review.enterBaseBranch': ['Enter a base branch.', '기준 브랜치를 입력하세요.'],
   'review.ready': ['Ready to review.', '리뷰할 준비가 되었습니다.'],
@@ -35,6 +68,17 @@ const messages = {
   'targets.error': ['Could not load changed files.', '변경 파일을 불러오지 못했습니다.'],
   'targets.empty': ['There are no changed files to review.', '리뷰할 변경 파일이 없습니다.'],
   'targets.fileCount': ['{count} files', '{count}개 파일'],
+  'targets.singleFile': ['1 file', '1개 파일'],
+  'targets.selectedCount': [
+    '{selected} of {total} files selected',
+    '전체 {total}개 중 {selected}개 선택',
+  ],
+  'targets.selectAll': ['Select all', '전체 선택'],
+  'targets.clearAll': ['Clear', '전체 해제'],
+  'targets.noSelection': [
+    'Select at least one file to start a review.',
+    '리뷰를 시작하려면 파일을 하나 이상 선택하세요.',
+  ],
   'targets.lineCount': ['{count} lines changed', '{count}줄 변경'],
   'targets.filteredDiff': ['Filtered Diff', '필터링된 Diff'],
   'targets.characters': ['{count} chars', '{count}자'],
@@ -55,6 +99,14 @@ const messages = {
     'This project will be selected by default on the review screen.',
     '리뷰 화면에서 기본으로 사용할 프로젝트입니다.',
   ],
+  'settings.language': ['Language', '언어'],
+  'settings.languageHint': [
+    'Follow the VS Code display language or choose a fixed language.',
+    'VS Code 표시 언어를 따르거나 사용할 언어를 고정합니다.',
+  ],
+  'settings.languageAuto': ['Automatic (VS Code)', '자동 (VS Code)'],
+  'settings.languageEnglish': ['English', 'English'],
+  'settings.languageKorean': ['Korean', '한국어'],
   'settings.sizeTitle': ['Review size limit', '리뷰 크기 제한'],
   'settings.sizeDescription': [
     'Prevent context overflow and slow responses from large Diffs.',
@@ -105,6 +157,14 @@ const messages = {
     'No Codivew report has been generated yet.',
     '아직 생성된 Codivew 리포트가 없습니다.',
   ],
+  'host.issueUnavailable': [
+    'This review issue is no longer available.',
+    '이 리뷰 이슈를 더 이상 열 수 없습니다.',
+  ],
+  'host.issueFileError': [
+    'Could not open the reviewed file: {message}',
+    '리뷰 파일을 열 수 없습니다: {message}',
+  ],
   'host.collecting': ['Collecting Git changes...', 'Git 변경사항 수집 중...'],
   'host.generating': ['Generating review with Ollama...', 'Ollama로 리뷰 생성 중...'],
   'host.reportComplete': ['Report generated', '리포트 생성 완료'],
@@ -124,6 +184,7 @@ const messages = {
     '최대 Diff 크기는 1,000자 이상의 정수여야 합니다.',
   ],
   'host.settingsSaved': ['Review environment settings saved.', '리뷰 환경 설정을 저장했습니다.'],
+  'host.invalidLanguage': ['Select a valid language.', '올바른 언어를 선택하세요.'],
   'host.scopeUnavailable': [
     'Could not determine the review scope.',
     '리뷰 범위를 확인할 수 없습니다.',
@@ -164,6 +225,14 @@ let activeLocale: Locale = 'en';
 
 export function parseLocale(language: string): Locale {
   return language.toLowerCase().startsWith('ko') ? 'ko-KR' : 'en';
+}
+
+export function parseLanguagePreference(value: unknown): LanguagePreference | undefined {
+  return value === 'auto' || value === 'en' || value === 'ko-KR' ? value : undefined;
+}
+
+export function resolveLocale(preference: LanguagePreference, vscodeLanguage: string): Locale {
+  return preference === 'auto' ? parseLocale(vscodeLanguage) : preference;
 }
 
 export function setLocale(locale: Locale): void {

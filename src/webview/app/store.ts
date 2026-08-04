@@ -20,11 +20,12 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
   )
     ? (persistedWorkspaceIndex ?? -1)
     : (initial.workspaces[0]?.index ?? -1);
+  const persistedTab = persisted?.activeTab === 'results' ? 'review' : persisted?.activeTab;
   return configureStore({
     reducer: combinedReducer,
     preloadedState: {
       navigation: {
-        activeTab: initial.setupComplete ? (persisted?.activeTab ?? 'review') : 'settings',
+        activeTab: initial.setupComplete ? (persistedTab ?? 'review') : 'settings',
       },
       ollama: {
         url: initial.ollamaUrl,
@@ -42,6 +43,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         status: 'idle' as const,
         statusMessage: t('review.ready'),
         diffStats: emptyDiffStats(maxDiffChars),
+        selectedFiles: [],
         diffStatsStatus: 'idle' as const,
         diffStatsMessage: t('review.scopeCalculating'),
         diffStatsRequestId: 0,
@@ -50,6 +52,9 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         maxDiffChars,
         draftMaxDiffChars:
           persisted?.maxDiffCharsDraft ?? persisted?.maxDiffChars ?? initial.maxDiffChars,
+        language: initial.language,
+        draftLanguage: initial.language,
+        locale: initial.locale,
         setupComplete: initial.setupComplete,
         status: 'idle' as const,
         message: t('settings.diffDescription'),

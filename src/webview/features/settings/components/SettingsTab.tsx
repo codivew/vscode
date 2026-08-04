@@ -7,7 +7,11 @@ import { formatNumber } from '../../../shared/format.js';
 import { validHttpUrl } from '../../../shared/url.js';
 import OllamaFields from '../../ollama/components/OllamaFields.js';
 import { workspaceChanged } from '../../review/reviewSlice.js';
-import { draftMaxDiffCharsChanged, settingsSaveRequested } from '../settingsSlice.js';
+import {
+  draftLanguageChanged,
+  draftMaxDiffCharsChanged,
+  settingsSaveRequested,
+} from '../settingsSlice.js';
 import styles from './SettingsTab.module.css';
 import { t } from '../../../../localization.js';
 
@@ -35,6 +39,7 @@ const SettingsTab = (): React.JSX.Element => {
       ollamaUrl: ollama.url,
       model: ollama.model,
       maxDiffChars: settings.draftMaxDiffChars,
+      language: settings.draftLanguage,
     });
   };
 
@@ -65,6 +70,22 @@ const SettingsTab = (): React.JSX.Element => {
           ))}
         </select>
         <div className={styles.hint}>{t('settings.workspaceHint')}</div>
+      </Field>
+
+      <Field label={t('settings.language')} htmlFor="language" className={styles.field}>
+        <select
+          id="language"
+          disabled={settings.status === 'saving'}
+          value={settings.draftLanguage}
+          onChange={(event) =>
+            dispatch(draftLanguageChanged(event.target.value as 'auto' | 'en' | 'ko-KR'))
+          }
+        >
+          <option value="auto">{t('settings.languageAuto')}</option>
+          <option value="en">{t('settings.languageEnglish')}</option>
+          <option value="ko-KR">{t('settings.languageKorean')}</option>
+        </select>
+        <div className={styles.hint}>{t('settings.languageHint')}</div>
       </Field>
 
       <OllamaFields disabled={settings.status === 'saving'} fieldClassName={styles.field} />

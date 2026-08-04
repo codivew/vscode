@@ -80,6 +80,21 @@
     "configuration": {
       "title": "Codivew",
       "properties": {
+        "codivew.language": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "en",
+            "ko-KR"
+          ],
+          "enumDescriptions": [
+            "%config.language.auto%",
+            "%config.language.en%",
+            "%config.language.ko%"
+          ],
+          "default": "auto",
+          "description": "%config.language%"
+        },
         "codivew.ollamaUrl": {
           "type": "string",
           "default": "http://localhost:11434",

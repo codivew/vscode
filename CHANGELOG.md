@@ -10,6 +10,7 @@ All notable changes to Codivew for VS Code are documented in this file.
   fallback locale.
 - Localized review views, notifications, progress and error messages, commands, and settings.
 - Matching language support for generated review feedback and HTML reports.
+- Automatic language detection and fixed English or Korean selection from the Settings tab.
 
 ## 0.1.0 - 2026-08-03
 

@@ -1,19 +1,19 @@
-:global(:root) {
+:root {
   color-scheme: light dark;
 }
 
-:global(*) {
+* {
   box-sizing: border-box;
 }
 
-:global(body) {
+body {
   margin: 0;
   color: var(--vscode-foreground);
   background: var(--vscode-sideBar-background);
   font: 13px/1.45 var(--vscode-font-family);
 }
 
-:global(button) {
+button {
   min-height: 32px;
   padding: 6px 12px;
   border: 0;
@@ -25,30 +25,30 @@
   cursor: pointer;
 }
 
-:global(button:hover) {
+button:hover {
   background: var(--vscode-button-hoverBackground);
 }
 
-:global(button:disabled) {
+button:disabled {
   cursor: default;
   opacity: 0.55;
 }
 
-main.reviewView {
+main.app {
   padding: 18px 14px 28px;
 }
 
-.hero {
+.appHero {
   margin-bottom: 18px;
 }
 
-.hero h1 {
+.appHero h1 {
   margin: 5px 0 4px;
   font-size: 22px;
   line-height: 1.2;
 }
 
-.eyebrow {
+.appEyebrow {
   color: var(--vscode-descriptionForeground);
   font-size: 10px;
   font-weight: 700;
@@ -56,7 +56,7 @@ main.reviewView {
   text-transform: uppercase;
 }
 
-.lead {
+.appLead {
   margin: 0;
   color: var(--vscode-descriptionForeground);
 }
