@@ -26,6 +26,9 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('codivew.openLatestReport', () =>
       controller.openLatestReport(),
     ),
+    vscode.commands.registerCommand('codivew.openIssue', (issueIndex: number) =>
+      controller.openLatestIssue(issueIndex),
+    ),
   );
 }
 

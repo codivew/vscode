@@ -15,6 +15,7 @@ select a fixed language from the **Settings** tab.
 - Preview changed files, lines, and filtered Diff size before starting.
 - Select the changed files to include in each review with live Diff statistics.
 - Limit large reviews to avoid context overflow and slow responses.
+- Browse structured findings by file and severity, then jump directly to the source line.
 - View findings directly in the VS Code Problems panel.
 - Open a complete HTML report after each review.
 
@@ -31,7 +32,7 @@ select a fixed language from the **Settings** tab.
 2. Select a workspace and enter the Ollama server URL.
 3. Choose an installed model and save the initial settings.
 4. Select the review range and click **Start review**.
-5. Review findings in the Problems panel or open the complete report.
+5. Review findings in the **Results** tab, jump to the source, or open the complete report.
 
 Language, workspace, Ollama connection, model, and maximum Diff size can be changed from the
 **Settings** tab.

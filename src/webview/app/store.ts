@@ -20,11 +20,12 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
   )
     ? (persistedWorkspaceIndex ?? -1)
     : (initial.workspaces[0]?.index ?? -1);
+  const persistedTab = persisted?.activeTab === 'results' ? 'review' : persisted?.activeTab;
   return configureStore({
     reducer: combinedReducer,
     preloadedState: {
       navigation: {
-        activeTab: initial.setupComplete ? (persisted?.activeTab ?? 'review') : 'settings',
+        activeTab: initial.setupComplete ? (persistedTab ?? 'review') : 'settings',
       },
       ollama: {
         url: initial.ollamaUrl,

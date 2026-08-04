@@ -14,6 +14,7 @@ async function run() {
   assert.ok(commands.includes('codivew.reviewWorking'));
   assert.ok(commands.includes('codivew.reviewStaged'));
   assert.ok(commands.includes('codivew.reviewBranch'));
+  assert.ok(commands.includes('codivew.openIssue'));
   assert.ok(commands.includes('codivew.reviewView.focus'));
   console.log('✓ activates and registers review commands');
 
@@ -37,6 +38,13 @@ async function run() {
   assert.equal(diagnostics[0].code, 'suggestion');
   assert.match(diagnostics[0].message, /변경값 확인/);
   console.log('✓ reviews a Git change and publishes a diagnostic');
+
+  await vscode.commands.executeCommand('codivew.openIssue', 0);
+  const editor = vscode.window.activeTextEditor;
+  assert.ok(editor, 'Review issue should open an editor.');
+  assert.equal(path.basename(editor.document.uri.fsPath), 'value.ts');
+  assert.equal(editor.selection.start.line, 0);
+  console.log('✓ opens a review issue at its source line');
 }
 
 module.exports = { run };

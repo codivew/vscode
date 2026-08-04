@@ -27,6 +27,9 @@ export function connectExtensionMessages(store: AppStore): () => void {
       return;
     }
     store.dispatch(reviewStateReceived(data));
+    if (data.status === 'completed' && data.result !== undefined) {
+      store.dispatch(tabChanged('results'));
+    }
   };
   window.addEventListener('message', listener);
   return () => window.removeEventListener('message', listener);

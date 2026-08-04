@@ -70,6 +70,14 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       this.controller.openLatestReport();
       return;
     }
+    if (message.type === 'openIssue') {
+      const reviewId = stringValue(message.reviewId);
+      const issueIndex = numberValue(message.issueIndex);
+      if (reviewId !== undefined && issueIndex !== undefined) {
+        await this.controller.openIssue(reviewId, issueIndex);
+      }
+      return;
+    }
     if (message.type === 'loadModels') {
       await this.loadModels(message);
       return;
@@ -305,9 +313,14 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       status: 'completed',
       message: result.json.result.summary,
       result: {
+        reviewId: result.reviewId,
         verdict: verdictLabel(result.verdict),
+        risk: result.json.result.risk,
+        summary: result.json.result.summary,
         reviewedFileCount: result.reviewedFileCount,
         issueCount: result.issueCount,
+        tests: result.json.result.tests,
+        issues: result.json.result.issues.map((issue, index) => ({ index, ...issue })),
       },
     });
   }
