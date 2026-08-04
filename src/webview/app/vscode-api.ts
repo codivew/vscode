@@ -1,4 +1,4 @@
-import type { ExtensionMessage } from '../types.js';
+import type { ExtensionMessage } from '../../shared/protocol.js';
 
 export type PersistedState = {
   workspaceIndex: number;

@@ -13,7 +13,7 @@ import {
   settingsSaveRequested,
 } from '../settingsSlice.js';
 import styles from './SettingsTab.module.css';
-import { t } from '../../../../localization.js';
+import { t } from '../../../../shared/localization.js';
 
 const PRESETS = [60_000, 120_000, 240_000];
 

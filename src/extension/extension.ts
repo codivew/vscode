@@ -1,8 +1,15 @@
 import * as vscode from 'vscode';
 import { ReviewMode, setLanguage } from 'codivew/core';
-import { parseLanguagePreference, resolveLocale, setLocale, t } from './localization.js';
-import { ReviewController } from './review-controller.js';
-import { ReviewViewProvider } from './review-view-provider.js';
+import {
+  getLocale,
+  parseLanguagePreference,
+  resolveLocale,
+  setLocale,
+  t,
+} from '../shared/localization.js';
+import { ReviewController } from './controller.js';
+import { ResultsPresenter } from './results/presenter.js';
+import { ReviewViewProvider } from './view-provider.js';
 
 export function activate(context: vscode.ExtensionContext): void {
   const configuredLanguage = vscode.workspace
@@ -14,7 +21,7 @@ export function activate(context: vscode.ExtensionContext): void {
   setLanguage(locale);
   console.info('[Codivew] Extension activated.');
   const diagnostics = vscode.languages.createDiagnosticCollection('codivew');
-  const controller = new ReviewController(diagnostics);
+  const controller = new ReviewController(new ResultsPresenter(diagnostics));
   const provider = new ReviewViewProvider(controller, context.extensionUri);
 
   context.subscriptions.push(
@@ -61,6 +68,7 @@ function registerReviewCommand(
 
     await controller.run({
       folder,
+      locale: getLocale(),
       mode,
       baseBranch: baseBranch.trim(),
       projectContext: configuration.get<string[]>('projectContext', []),

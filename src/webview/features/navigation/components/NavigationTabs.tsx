@@ -3,7 +3,7 @@ import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
 import { tabChanged, type NavigationTab } from '../navigationSlice.js';
 import styles from './NavigationTabs.module.css';
-import { t } from '../../../../localization.js';
+import { t } from '../../../../shared/localization.js';
 
 const NavigationTabs = (): React.JSX.Element => {
   const dispatch = useAppDispatch();

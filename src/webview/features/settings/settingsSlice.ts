@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { t, type LanguagePreference, type Locale } from '../../../localization.js';
+import { t, type LanguagePreference, type Locale } from '../../../shared/localization.js';
 
 export type SettingsStatus = 'idle' | 'saving' | 'saved' | 'error';
 

@@ -6,7 +6,7 @@ import SettingsTab from './features/settings/components/SettingsTab.js';
 import ResultsTab from './features/results/components/ResultsTab.js';
 import { useAppSelector } from './app/hooks.js';
 import './global.css';
-import { t } from '../localization.js';
+import { t } from '../shared/localization.js';
 
 const App = (): React.JSX.Element => {
   const activeTab = useAppSelector((state) => state.navigation.activeTab);

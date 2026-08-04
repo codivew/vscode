@@ -4,7 +4,7 @@ import { formatNumber } from '../../../shared/format.js';
 import type { ReviewState } from '../reviewSlice.js';
 import { allFilesSelectionChanged, fileSelectionChanged } from '../reviewSlice.js';
 import styles from './ReviewTargets.module.css';
-import { t } from '../../../../localization.js';
+import { t } from '../../../../shared/localization.js';
 import { useAppDispatch } from '../../../app/hooks.js';
 import { vscode } from '../../../app/vscode-api.js';
 

@@ -6,7 +6,7 @@ import Field from '../../../shared/components/Field.js';
 import { validHttpUrl } from '../../../shared/url.js';
 import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../ollamaSlice.js';
 import styles from './OllamaFields.module.css';
-import { t } from '../../../../localization.js';
+import { t } from '../../../../shared/localization.js';
 
 let nextRequestId = 0;
 

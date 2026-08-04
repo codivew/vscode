@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { t } from '../../../localization.js';
+import { t } from '../../../shared/localization.js';
 
 export type ModelsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 

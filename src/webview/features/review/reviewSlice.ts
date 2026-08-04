@@ -4,8 +4,8 @@ import type {
   ReviewResultSummary,
   ReviewStatus,
   WebviewInitialState,
-} from '../../types.js';
-import { t } from '../../../localization.js';
+} from '../../../shared/protocol.js';
+import { t } from '../../../shared/localization.js';
 
 export type DiffStatsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 

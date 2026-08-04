@@ -129,4 +129,4 @@ export type WebviewInitialState = {
   maxDiffChars: number;
   setupComplete: boolean;
 };
-import type { LanguagePreference, Locale } from '../localization.js';
+import type { LanguagePreference, Locale } from './localization.js';

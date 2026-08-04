@@ -1,9 +1,9 @@
 /** @jsxImportSource react */
 import React, { useMemo, useState } from 'react';
-import { t } from '../../../../localization.js';
+import { t } from '../../../../shared/localization.js';
 import { useAppSelector } from '../../../app/hooks.js';
 import { vscode } from '../../../app/vscode-api.js';
-import type { ReviewIssueSummary } from '../../../types.js';
+import type { ReviewIssueSummary } from '../../../../shared/protocol.js';
 import styles from './ResultsTab.module.css';
 
 type SeverityFilter = 'all' | ReviewIssueSummary['severity'];

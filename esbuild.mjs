@@ -2,7 +2,7 @@ import { build } from 'esbuild';
 
 await Promise.all([
   build({
-    entryPoints: ['src/extension.ts'],
+    entryPoints: ['src/extension/extension.ts'],
     bundle: true,
     platform: 'node',
     format: 'cjs',

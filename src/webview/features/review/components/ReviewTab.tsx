@@ -12,7 +12,7 @@ import {
 } from '../reviewSlice.js';
 import ReviewTargets from './ReviewTargets.js';
 import styles from './ReviewTab.module.css';
-import { t } from '../../../../localization.js';
+import { t } from '../../../../shared/localization.js';
 
 let nextStatsRequestId = 0;
 

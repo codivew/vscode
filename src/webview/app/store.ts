@@ -3,9 +3,9 @@ import { navigationSlice } from '../features/navigation/navigationSlice.js';
 import { ollamaSlice } from '../features/ollama/ollamaSlice.js';
 import { emptyDiffStats, reviewSlice } from '../features/review/reviewSlice.js';
 import { settingsSlice } from '../features/settings/settingsSlice.js';
-import type { WebviewInitialState } from '../types.js';
+import type { WebviewInitialState } from '../../shared/protocol.js';
 import type { PersistedState } from './vscode-api.js';
-import { t } from '../../localization.js';
+import { t } from '../../shared/localization.js';
 
 export type RootState = ReturnType<typeof combinedReducer>;
 export type AppStore = EnhancedStore<RootState>;
