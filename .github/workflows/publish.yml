@@ -1,4 +1,4 @@
-name: Publish 
+name: Publish
 
 on:
   release:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: open-vsx-${{ github.ref }}
+  group: publish-extension-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -35,6 +35,11 @@ jobs:
 
       - name: Package extension
         run: npm run package -- --out codivew.vsix
+
+      - name: Publish to Visual Studio Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx vsce publish --packagePath codivew.vsix --skip-duplicate
 
       - name: Publish to Open VSX
         env:
