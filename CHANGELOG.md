@@ -2,6 +2,12 @@
 
 All notable changes to Codivew for VS Code are documented in this file.
 
+## 0.2.1 - 2026-08-04
+
+### Fixed
+
+- Automatic language detection now follows the Korean display locale in Cursor as well as VS Code.
+
 ## 0.2.0 - 2026-08-04
 
 ### Added

@@ -126,7 +126,7 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
     await configuration.update('model', model, vscode.ConfigurationTarget.Global);
     await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
     await configuration.update('language', language, vscode.ConfigurationTarget.Global);
-    const locale = resolveLocale(language, vscode.env.language);
+    const locale = resolveLocale(language, vscode.env.language, process.env.VSCODE_NLS_CONFIG);
     setLocale(locale);
     setLanguage(locale);
     this.postSettings('saved', t('host.settingsSaved'), maxDiffChars, true, language, locale);

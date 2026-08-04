@@ -5,9 +5,11 @@ import { ReviewController } from './review-controller.js';
 import { ReviewViewProvider } from './review-view-provider.js';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const configuredLanguage = vscode.workspace.getConfiguration('codivew').get('language', 'auto');
+  const configuredLanguage = vscode.workspace
+    .getConfiguration('codivew', vscode.workspace.workspaceFolders?.[0]?.uri)
+    .get('language', 'auto');
   const language = parseLanguagePreference(configuredLanguage) ?? 'auto';
-  const locale = resolveLocale(language, vscode.env.language);
+  const locale = resolveLocale(language, vscode.env.language, process.env.VSCODE_NLS_CONFIG);
   setLocale(locale);
   setLanguage(locale);
   console.info('[Codivew] Extension activated.');

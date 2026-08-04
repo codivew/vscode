@@ -231,8 +231,29 @@ export function parseLanguagePreference(value: unknown): LanguagePreference | un
   return value === 'auto' || value === 'en' || value === 'ko-KR' ? value : undefined;
 }
 
-export function resolveLocale(preference: LanguagePreference, vscodeLanguage: string): Locale {
-  return preference === 'auto' ? parseLocale(vscodeLanguage) : preference;
+export function resolveLocale(
+  preference: LanguagePreference,
+  vscodeLanguage: string,
+  vscodeNlsConfig?: string,
+): Locale {
+  if (preference !== 'auto') return preference;
+
+  const nlsLanguage = parseNlsLanguage(vscodeNlsConfig);
+  return [vscodeLanguage, nlsLanguage].some(
+    (language) => language !== undefined && parseLocale(language) === 'ko-KR',
+  )
+    ? 'ko-KR'
+    : 'en';
+}
+
+function parseNlsLanguage(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  try {
+    const config = JSON.parse(value) as { locale?: unknown };
+    return typeof config.locale === 'string' ? config.locale : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function setLocale(locale: Locale): void {
