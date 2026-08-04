@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
-import React, { useEffect, type FormEvent } from 'react';
+import React, { useCallback, useEffect, type FormEvent } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks.js';
 import { vscode } from '../app/vscode-api.js';
@@ -31,21 +32,21 @@ const ReviewPage = (): React.JSX.Element => {
   const workspace = review.workspaces.find((item) => item.index === review.workspaceIndex);
   const diffTooLarge = review.diffStats.filteredCharCount > review.diffStats.maxDiffChars;
 
-  useEffect(() => {
-    const loadCurrentBranch = (): void => {
-      const requestId = ++nextBranchRequestId;
-      dispatch(currentBranchRequested({ requestId }));
-      vscode.postMessage({
-        type: 'loadCurrentBranch',
-        workspaceIndex: review.workspaceIndex,
-        requestId,
-      });
-    };
+  const loadCurrentBranch = useCallback((): void => {
+    const requestId = ++nextBranchRequestId;
+    dispatch(currentBranchRequested({ requestId }));
+    vscode.postMessage({
+      type: 'loadCurrentBranch',
+      workspaceIndex: review.workspaceIndex,
+      requestId,
+    });
+  }, [dispatch, review.workspaceIndex]);
 
+  useEffect(() => {
     loadCurrentBranch();
     window.addEventListener('focus', loadCurrentBranch);
     return (): void => window.removeEventListener('focus', loadCurrentBranch);
-  }, [dispatch, review.workspaceIndex]);
+  }, [loadCurrentBranch]);
 
   useEffect(() => {
     const requestId = ++nextStatsRequestId;
@@ -104,9 +105,6 @@ const ReviewPage = (): React.JSX.Element => {
         <div>
           <span>{t('review.environment')}</span>
           <strong>{workspace?.name ?? t('review.noWorkspace')}</strong>
-          <small className={styles.currentBranch}>
-            {t('review.currentBranch')}: {currentBranchLabel(review)}
-          </small>
           <small>{ollama.model || t('review.noModel')}</small>
         </div>
         <button
@@ -118,6 +116,29 @@ const ReviewPage = (): React.JSX.Element => {
           {t('review.change')}
         </button>
       </section>
+
+      <Field label={t('review.currentBranch')} htmlFor="current-branch">
+        <div className={styles.branchControl}>
+          <input
+            id="current-branch"
+            value={currentBranchLabel(review)}
+            title={review.currentBranch}
+            readOnly
+          />
+          <button
+            className={`${styles.textButton} ${styles.iconButton}`}
+            type="button"
+            aria-label={t('review.refreshCurrentBranch')}
+            title={t('review.refreshCurrentBranch')}
+            disabled={
+              workspace === undefined || running || review.currentBranchStatus === 'loading'
+            }
+            onClick={loadCurrentBranch}
+          >
+            <RefreshCw size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </Field>
 
       <Field label={t('review.scope')} htmlFor="mode">
         <select

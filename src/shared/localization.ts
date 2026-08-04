@@ -11,6 +11,7 @@ const messages = {
   'review.noModel': ['No model configured', '모델 미설정'],
   'review.change': ['Change', '변경'],
   'review.currentBranch': ['Current branch', '현재 브랜치'],
+  'review.refreshCurrentBranch': ['Refresh', '새로고침'],
   'review.currentBranchLoading': ['Loading...', '확인 중...'],
   'review.currentBranchUnavailable': ['Unavailable', '확인할 수 없음'],
   'review.detachedHead': ['Detached HEAD', '분리된 HEAD'],

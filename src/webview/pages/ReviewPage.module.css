@@ -39,8 +39,26 @@
   white-space: nowrap;
 }
 
-.reviewEnvironment .currentBranch {
-  color: var(--vscode-foreground);
+.branchControl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.branchControl .textButton {
+  min-height: 30px;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  padding: 7px;
+}
+
+.iconButton svg {
+  width: 16px;
+  height: 16px;
 }
 
 .textButton {
