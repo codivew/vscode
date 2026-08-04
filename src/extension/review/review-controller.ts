@@ -7,9 +7,9 @@ import {
   type ReviewProgressStage,
   type RunReviewResult,
 } from 'codivew/core';
-import { t } from '../shared/localization.js';
-import { ResultsPresenter } from './results/presenter.js';
-import { executeReview } from './runner.js';
+import { t } from '../../shared/localization.js';
+import { ResultsPresenter } from '../results/presenter.js';
+import { executeReview } from './review-runner.js';
 
 export type ReviewInput = {
   folder: vscode.WorkspaceFolder;

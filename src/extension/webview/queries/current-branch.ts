@@ -1,14 +1,14 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import * as vscode from 'vscode';
-import { numberValue } from './message-values.js';
-import type { LoadCurrentBranchMessage, WebviewMessage } from '../shared/protocol.js';
+import { numberValue } from '../message-values.js';
+import type { LoadCurrentBranchMessage, WebviewMessage } from '../../../shared/protocol.js';
 
 const execFileAsync = promisify(execFile);
 
 type CurrentBranchResponse = Extract<WebviewMessage, { type: 'currentBranch' }>;
 
-export async function loadCurrentBranch(
+export async function getCurrentBranch(
   message: LoadCurrentBranchMessage,
 ): Promise<CurrentBranchResponse | undefined> {
   const requestId = numberValue(message.requestId);

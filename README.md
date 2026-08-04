@@ -51,6 +51,6 @@ npm run check
 npm run package
 ```
 
-Use `npm run test:extension` for VS Code or `npm run test:cursor` for an installed Cursor app.
+Use `npm run test:extension` to run the VS Code integration test.
 
 Codivew imports its review engine from the public `codivew/core` API.

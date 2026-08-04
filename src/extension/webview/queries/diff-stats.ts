@@ -7,14 +7,14 @@ import {
   ReviewError,
   ReviewMode,
 } from 'codivew/core';
-import { splitDiffFiles } from './diff-files.js';
-import { numberValue, positiveIntegerValue, reviewMode, stringValue } from './message-values.js';
-import { t } from '../shared/localization.js';
-import type { LoadDiffStatsMessage, WebviewMessage } from '../shared/protocol.js';
+import { splitDiffFiles } from '../../review/diff-files.js';
+import { numberValue, positiveIntegerValue, reviewMode, stringValue } from '../message-values.js';
+import { t } from '../../../shared/localization.js';
+import type { LoadDiffStatsMessage, WebviewMessage } from '../../../shared/protocol.js';
 
 type DiffStatsResponse = Extract<WebviewMessage, { type: 'diffStats' }>;
 
-export class DiffStatsLoader {
+export class DiffStatsQuery {
   private activeController: AbortController | undefined;
 
   dispose(): void {

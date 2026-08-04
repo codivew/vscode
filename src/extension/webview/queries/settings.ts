@@ -6,13 +6,13 @@ import {
   resolveLocale,
   setLocale,
   t,
-} from '../shared/localization.js';
-import { numberValue, positiveIntegerValue, stringValue, validHttpUrl } from './message-values.js';
+} from '../../../shared/localization.js';
+import { numberValue, positiveIntegerValue, stringValue, validHttpUrl } from '../message-values.js';
 import type {
   SaveSettingsMessage,
   WebviewInitialState,
   WebviewMessage,
-} from '../shared/protocol.js';
+} from '../../../shared/protocol.js';
 
 type SettingsResponse = Extract<WebviewMessage, { type: 'settings' }>;
 

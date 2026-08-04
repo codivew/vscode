@@ -128,14 +128,13 @@
     }
   },
   "scripts": {
-    "build": "node esbuild.mjs",
+    "build": "node esbuild.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"test/**/*.cjs\" \"*.{json,md,mjs}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"test/**/*.cjs\" \"*.{json,md,mjs}\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" \"test/**/*.{js,cjs}\" \"*.js\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"test/**/*.{cjs,js}\" \"*.{js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"test/**/*.{cjs,js}\" \"*.{js,json,md}\"",
     "check": "npm run typecheck && npm run lint",
-    "test:extension": "npm run build && node test/run-tests.mjs",
-    "test:cursor": "npm run build && node test/run-tests.mjs --cursor",
+    "test:extension": "npm run build && node test/run-tests.js",
     "package": "npm run build && vsce package --no-dependencies"
   },
   "dependencies": {
@@ -159,6 +158,7 @@
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
+    "globals": "^17.9.0",
     "ovsx": "^1.1.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
