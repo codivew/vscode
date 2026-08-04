@@ -12,23 +12,35 @@ const NavigationTabs = (): React.JSX.Element | null => {
   if (!setupComplete) return null;
 
   const tabs = [
-    { path: '/review', label: t('nav.review') },
-    ...(hasResult ? [{ path: '/results', label: t('nav.results') }] : []),
-    { path: '/settings', label: t('nav.settings') },
+    { path: '/review', label: t('nav.review'), disabled: false },
+    { path: '/results', label: t('nav.results'), disabled: !hasResult },
+    { path: '/settings', label: t('nav.settings'), disabled: false },
   ];
   return (
     <nav className={styles.tabs} role="tablist" aria-label={t('nav.menu')}>
-      {tabs.map((tab) => (
-        <NavLink
-          key={tab.path}
-          to={tab.path}
-          role="tab"
-          aria-selected={pathname === tab.path}
-          className={({ isActive }) => (isActive ? styles.active : undefined)}
-        >
-          {tab.label}
-        </NavLink>
-      ))}
+      {tabs.map((tab) =>
+        tab.disabled ? (
+          <span
+            key={tab.path}
+            role="tab"
+            aria-selected="false"
+            aria-disabled="true"
+            className={styles.disabled}
+          >
+            {tab.label}
+          </span>
+        ) : (
+          <NavLink
+            key={tab.path}
+            to={tab.path}
+            role="tab"
+            aria-selected={pathname === tab.path}
+            className={({ isActive }) => (isActive ? styles.active : undefined)}
+          >
+            {tab.label}
+          </NavLink>
+        ),
+      )}
     </nav>
   );
 };
