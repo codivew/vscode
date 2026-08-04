@@ -1,5 +1,4 @@
 import { combineSlices, configureStore, type EnhancedStore } from '@reduxjs/toolkit';
-import { navigationSlice } from '../features/navigation/navigationSlice.js';
 import { ollamaSlice } from '../features/ollama/ollamaSlice.js';
 import { emptyDiffStats, reviewSlice } from '../features/review/reviewSlice.js';
 import { settingsSlice } from '../features/settings/settingsSlice.js';
@@ -10,7 +9,7 @@ import { t } from '../../shared/localization.js';
 export type RootState = ReturnType<typeof combinedReducer>;
 export type AppStore = EnhancedStore<RootState>;
 
-const combinedReducer = combineSlices(navigationSlice, ollamaSlice, reviewSlice, settingsSlice);
+const combinedReducer = combineSlices(ollamaSlice, reviewSlice, settingsSlice);
 
 export function createAppStore(initial: WebviewInitialState, persisted?: PersistedState): AppStore {
   const maxDiffChars = initial.maxDiffChars;
@@ -20,13 +19,9 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
   )
     ? (persistedWorkspaceIndex ?? -1)
     : (initial.workspaces[0]?.index ?? -1);
-  const persistedTab = persisted?.activeTab === 'results' ? 'review' : persisted?.activeTab;
   return configureStore({
     reducer: combinedReducer,
     preloadedState: {
-      navigation: {
-        activeTab: initial.setupComplete ? (persistedTab ?? 'review') : 'settings',
-      },
       ollama: {
         url: initial.ollamaUrl,
         model: initial.model,

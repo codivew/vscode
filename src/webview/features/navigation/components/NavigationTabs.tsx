@@ -1,32 +1,30 @@
 /** @jsxImportSource react */
 import React from 'react';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
-import { tabChanged, type NavigationTab } from '../navigationSlice.js';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useAppSelector } from '../../../app/hooks.js';
 import styles from './NavigationTabs.module.css';
 import { t } from '../../../../shared/localization.js';
 
 const NavigationTabs = (): React.JSX.Element => {
-  const dispatch = useAppDispatch();
-  const activeTab = useAppSelector((state) => state.navigation.activeTab);
+  const { pathname } = useLocation();
   const hasResult = useAppSelector((state) => state.review.result !== undefined);
-  const tabs: Array<{ id: NavigationTab; label: string }> = [
-    { id: 'review', label: t('nav.review') },
-    ...(hasResult ? [{ id: 'results' as const, label: t('nav.results') }] : []),
-    { id: 'settings', label: t('nav.settings') },
+  const tabs = [
+    { path: '/review', label: t('nav.review') },
+    ...(hasResult ? [{ path: '/results', label: t('nav.results') }] : []),
+    { path: '/settings', label: t('nav.settings') },
   ];
   return (
     <nav className={styles.tabs} role="tablist" aria-label={t('nav.menu')}>
       {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
+        <NavLink
+          key={tab.path}
+          to={tab.path}
           role="tab"
-          aria-selected={activeTab === tab.id}
-          className={activeTab === tab.id ? styles.active : undefined}
-          onClick={() => dispatch(tabChanged(tab.id))}
+          aria-selected={pathname === tab.path}
+          className={({ isActive }) => (isActive ? styles.active : undefined)}
         >
           {tab.label}
-        </button>
+        </NavLink>
       ))}
     </nav>
   );

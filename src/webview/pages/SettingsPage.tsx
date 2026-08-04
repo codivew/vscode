@@ -1,23 +1,23 @@
 /** @jsxImportSource react */
 import React, { type FormEvent } from 'react';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
-import { vscode } from '../../../app/vscode-api.js';
-import Field from '../../../shared/components/Field.js';
-import { formatNumber } from '../../../shared/format.js';
-import { validHttpUrl } from '../../../shared/url.js';
-import OllamaFields from '../../ollama/components/OllamaFields.js';
-import { workspaceChanged } from '../../review/reviewSlice.js';
+import { useAppDispatch, useAppSelector } from '../app/hooks.js';
+import { vscode } from '../app/vscode-api.js';
+import Field from '../shared/components/Field.js';
+import { formatNumber } from '../shared/format.js';
+import { validHttpUrl } from '../shared/url.js';
+import OllamaFields from '../features/ollama/components/OllamaFields.js';
+import { workspaceChanged } from '../features/review/reviewSlice.js';
 import {
   draftLanguageChanged,
   draftMaxDiffCharsChanged,
   settingsSaveRequested,
-} from '../settingsSlice.js';
-import styles from './SettingsTab.module.css';
-import { t } from '../../../../shared/localization.js';
+} from '../features/settings/settingsSlice.js';
+import styles from './SettingsPage.module.css';
+import { t } from '../../shared/localization.js';
 
 const PRESETS = [60_000, 120_000, 240_000];
 
-const SettingsTab = (): React.JSX.Element => {
+const SettingsPage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const settings = useAppSelector((state) => state.settings);
   const review = useAppSelector((state) => state.review);
@@ -143,4 +143,4 @@ const SettingsTab = (): React.JSX.Element => {
   );
 };
 
-export default SettingsTab;
+export default SettingsPage;

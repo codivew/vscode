@@ -1,23 +1,24 @@
 /** @jsxImportSource react */
 import React, { useEffect, type FormEvent } from 'react';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
-import { vscode } from '../../../app/vscode-api.js';
-import Field from '../../../shared/components/Field.js';
-import { tabChanged } from '../../navigation/navigationSlice.js';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../app/hooks.js';
+import { vscode } from '../app/vscode-api.js';
+import Field from '../shared/components/Field.js';
 import {
   baseBranchChanged,
   diffStatsInvalidated,
   diffStatsRequested,
   modeChanged,
-} from '../reviewSlice.js';
-import ReviewTargets from './ReviewTargets.js';
-import styles from './ReviewTab.module.css';
-import { t } from '../../../../shared/localization.js';
+} from '../features/review/reviewSlice.js';
+import ReviewTargets from '../features/review/components/ReviewTargets.js';
+import styles from './ReviewPage.module.css';
+import { t } from '../../shared/localization.js';
 
 let nextStatsRequestId = 0;
 
-const ReviewTab = (): React.JSX.Element => {
+const ReviewPage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const review = useAppSelector((state) => state.review);
   const ollama = useAppSelector((state) => state.ollama);
   const maxDiffChars = useAppSelector((state) => state.settings.maxDiffChars);
@@ -90,7 +91,7 @@ const ReviewTab = (): React.JSX.Element => {
           className={styles.textButton}
           type="button"
           disabled={running}
-          onClick={() => dispatch(tabChanged('settings'))}
+          onClick={() => void navigate('/settings')}
         >
           {t('review.change')}
         </button>
@@ -179,4 +180,4 @@ const Metric = ({ value, label }: { value: string | number; label: string }): Re
   );
 };
 
-export default ReviewTab;
+export default ReviewPage;
