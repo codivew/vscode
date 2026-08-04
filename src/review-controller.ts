@@ -178,6 +178,25 @@ export class ReviewController {
     await this.openIssue(reviewId, issueIndex);
   }
 
+  async openFile(folder: vscode.WorkspaceFolder, file: string): Promise<void> {
+    const uri = workspaceFileUri(folder.uri.fsPath, file);
+    if (uri === undefined) {
+      await vscode.window.showWarningMessage(t('host.fileUnavailable'));
+      return;
+    }
+
+    try {
+      const document = await vscode.workspace.openTextDocument(uri);
+      await vscode.window.showTextDocument(document, {
+        preview: true,
+        preserveFocus: false,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await vscode.window.showErrorMessage(t('host.fileOpenError', { message }));
+    }
+  }
+
   private openReport(result: RunReviewResult): void {
     const panel = vscode.window.createWebviewPanel(
       'codivew.reviewReport',
@@ -268,8 +287,12 @@ function publishDiagnostics(
 }
 
 function reviewFileUri(result: RunReviewResult, file: string): vscode.Uri | undefined {
-  const absolutePath = resolve(result.repositoryRoot, file);
-  const relativePath = relative(result.repositoryRoot, absolutePath);
+  return workspaceFileUri(result.repositoryRoot, file);
+}
+
+function workspaceFileUri(root: string, file: string): vscode.Uri | undefined {
+  const absolutePath = resolve(root, file);
+  const relativePath = relative(root, absolutePath);
   if (isAbsolute(relativePath) || relativePath.startsWith('..')) return undefined;
   return vscode.Uri.file(absolutePath);
 }

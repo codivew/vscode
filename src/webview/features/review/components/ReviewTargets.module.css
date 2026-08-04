@@ -108,6 +108,8 @@
 }
 
 .fileList li {
+  display: flex;
+  align-items: center;
   min-width: 0;
   border-radius: 3px;
 }
@@ -122,11 +124,44 @@
 
 .fileList label {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 7px;
   min-width: 0;
   padding: 5px 6px;
   cursor: pointer;
+}
+
+.openFileButton {
+  display: grid;
+  flex: 0 0 24px;
+  place-items: center;
+  width: 24px;
+  min-height: 24px;
+  margin-right: 3px;
+  padding: 0;
+  color: var(--vscode-button-secondaryForeground);
+  background: transparent;
+  opacity: 0;
+}
+
+.fileList li:hover .openFileButton,
+.openFileButton:focus-visible {
+  opacity: 1;
+}
+
+.openFileButton:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.openFileButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.2;
 }
 
 .fileList input {

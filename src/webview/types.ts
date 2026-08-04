@@ -39,6 +39,7 @@ export type ExtensionMessage =
   | LoadDiffStatsMessage
   | SaveSettingsMessage
   | { type: 'cancel' }
+  | { type: 'openFile'; workspaceIndex: unknown; path: unknown }
   | { type: 'openReport' }
   | { type: 'openIssue'; reviewId: unknown; issueIndex: unknown };
 

@@ -75,6 +75,8 @@ const messages = {
   ],
   'targets.selectAll': ['Select all', '전체 선택'],
   'targets.clearAll': ['Clear', '전체 해제'],
+  'targets.openFile': ['Open file', '파일 열기'],
+  'targets.openFileNamed': ['Open {path}', '{path} 열기'],
   'targets.noSelection': [
     'Select at least one file to start a review.',
     '리뷰를 시작하려면 파일을 하나 이상 선택하세요.',
@@ -165,6 +167,11 @@ const messages = {
     'Could not open the reviewed file: {message}',
     '리뷰 파일을 열 수 없습니다: {message}',
   ],
+  'host.fileUnavailable': [
+    'This file is not available in the selected workspace.',
+    '선택한 워크스페이스에서 이 파일을 열 수 없습니다.',
+  ],
+  'host.fileOpenError': ['Could not open the file: {message}', '파일을 열 수 없습니다: {message}'],
   'host.collecting': ['Collecting Git changes...', 'Git 변경사항 수집 중...'],
   'host.generating': ['Generating review with Ollama...', 'Ollama로 리뷰 생성 중...'],
   'host.reportComplete': ['Report generated', '리포트 생성 완료'],

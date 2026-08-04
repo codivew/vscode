@@ -6,12 +6,16 @@ import { allFilesSelectionChanged, fileSelectionChanged } from '../reviewSlice.j
 import styles from './ReviewTargets.module.css';
 import { t } from '../../../../localization.js';
 import { useAppDispatch } from '../../../app/hooks.js';
+import { vscode } from '../../../app/vscode-api.js';
 
 const ReviewTargets = ({
   review,
   disabled,
 }: {
-  review: Pick<ReviewState, 'diffStats' | 'diffStatsStatus' | 'diffStatsMessage' | 'selectedFiles'>;
+  review: Pick<
+    ReviewState,
+    'workspaceIndex' | 'diffStats' | 'diffStatsStatus' | 'diffStatsMessage' | 'selectedFiles'
+  >;
   disabled: boolean;
 }): React.JSX.Element => {
   const dispatch = useAppDispatch();
@@ -92,6 +96,13 @@ const ReviewTargets = ({
                 path={file.path}
                 checked={selectedFiles.includes(file.path)}
                 disabled={disabled}
+                onOpen={() =>
+                  vscode.postMessage({
+                    type: 'openFile',
+                    workspaceIndex: review.workspaceIndex,
+                    path: file.path,
+                  })
+                }
                 onChange={(selected) =>
                   dispatch(fileSelectionChanged({ path: file.path, selected }))
                 }
@@ -154,11 +165,13 @@ const FileRow = ({
   path,
   checked,
   disabled,
+  onOpen,
   onChange,
 }: {
   path: string;
   checked: boolean;
   disabled: boolean;
+  onOpen: () => void;
   onChange: (selected: boolean) => void;
 }): React.JSX.Element => {
   const separator = path.lastIndexOf('/');
@@ -182,6 +195,19 @@ const FileRow = ({
           <span className={styles.fileName}>{name}</span>
         </span>
       </label>
+      <button
+        className={styles.openFileButton}
+        type="button"
+        title={t('targets.openFile')}
+        aria-label={t('targets.openFileNamed', { path })}
+        onClick={onOpen}
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M9.5 2.5h4v4" />
+          <path d="m13.25 2.75-6 6" />
+          <path d="M12.5 9v3.5h-9v-9H7" />
+        </svg>
+      </button>
     </li>
   );
 };

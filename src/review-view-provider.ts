@@ -78,6 +78,18 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       }
       return;
     }
+    if (message.type === 'openFile') {
+      const folders = vscode.workspace.workspaceFolders ?? [];
+      const workspaceIndex = numberValue(message.workspaceIndex);
+      const folder = workspaceIndex === undefined ? undefined : folders[workspaceIndex];
+      const path = stringValue(message.path);
+      if (folder === undefined || path === undefined) {
+        await vscode.window.showWarningMessage(t('host.fileUnavailable'));
+        return;
+      }
+      await this.controller.openFile(folder, path);
+      return;
+    }
     if (message.type === 'loadModels') {
       await this.loadModels(message);
       return;
