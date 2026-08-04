@@ -2,7 +2,28 @@
 
 All notable changes to Codivew for VS Code are documented in this file.
 
-## 0.2.1 - 2026-08-04
+## 0.2.2
+
+### Added
+
+- Current Git branch information with an accessible refresh action on the Review page.
+- Automatic local and remote branch discovery for base-branch selection in both the Review page
+  and branch-review command.
+- A persistent `npm run dev` command for opening the extension in a development VS Code window.
+
+### Changed
+
+- The Results tab now remains visible and is disabled until a review result is available.
+- Base branches are selected from Git data instead of being entered as free-form text.
+- The Review page uses a more compact layout with reduced outer spacing, a read-only current-branch
+  field, and Lucide icons.
+- Extension host code is organized by commands, review flow, repository access, webview handling,
+  and result presentation.
+- Build, ESLint, and test runner configuration files now use the project's standard ESM `.js`
+  convention, and linting includes development and test scripts.
+- The README screenshot reflects the latest Review page design.
+
+## 0.2.1
 
 ### Fixed
 
@@ -15,7 +36,7 @@ All notable changes to Codivew for VS Code are documented in this file.
 - Route-level views are now organized as pages, with reusable state and components remaining in
   their feature modules.
 
-## 0.2.0 - 2026-08-04
+## 0.2.0
 
 ### Added
 
@@ -33,7 +54,7 @@ All notable changes to Codivew for VS Code are documented in this file.
 - The release workflow now publishes the packaged extension to both Visual Studio Marketplace and
   Open VSX.
 
-## 0.1.1 - 2026-08-04
+## 0.1.1
 
 ### Added
 
@@ -43,7 +64,7 @@ All notable changes to Codivew for VS Code are documented in this file.
 - Matching language support for generated review feedback and HTML reports.
 - Automatic language detection and fixed English or Korean selection from the Settings tab.
 
-## 0.1.0 - 2026-08-03
+## 0.1.0
 
 ### Added
 
