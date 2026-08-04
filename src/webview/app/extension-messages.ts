@@ -1,5 +1,6 @@
 import { modelsReceived } from '../features/ollama/ollamaSlice.js';
 import {
+  branchesReceived,
   currentBranchReceived,
   diffStatsReceived,
   reviewStateReceived,
@@ -24,6 +25,10 @@ export function connectExtensionMessages(
     }
     if (data.type === 'currentBranch') {
       store.dispatch(currentBranchReceived(data));
+      return;
+    }
+    if (data.type === 'branches') {
+      store.dispatch(branchesReceived(data));
       return;
     }
     if (data.type === 'settings') {

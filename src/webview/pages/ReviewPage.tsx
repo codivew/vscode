@@ -7,6 +7,7 @@ import { vscode } from '../app/vscode-api.js';
 import Field from '../shared/components/Field.js';
 import {
   baseBranchChanged,
+  branchesRequested,
   currentBranchRequested,
   diffStatsInvalidated,
   diffStatsRequested,
@@ -19,6 +20,7 @@ import { t } from '../../shared/localization.js';
 
 let nextStatsRequestId = 0;
 let nextBranchRequestId = 0;
+let nextBranchesRequestId = 0;
 
 const ReviewPage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
@@ -32,21 +34,29 @@ const ReviewPage = (): React.JSX.Element => {
   const workspace = review.workspaces.find((item) => item.index === review.workspaceIndex);
   const diffTooLarge = review.diffStats.filteredCharCount > review.diffStats.maxDiffChars;
 
-  const loadCurrentBranch = useCallback((): void => {
-    const requestId = ++nextBranchRequestId;
-    dispatch(currentBranchRequested({ requestId }));
+  const refreshRepository = useCallback((): void => {
+    const branchRequestId = ++nextBranchRequestId;
+    dispatch(currentBranchRequested({ requestId: branchRequestId }));
     vscode.postMessage({
       type: 'loadCurrentBranch',
       workspaceIndex: review.workspaceIndex,
-      requestId,
+      requestId: branchRequestId,
+    });
+
+    const branchesRequestId = ++nextBranchesRequestId;
+    dispatch(branchesRequested({ requestId: branchesRequestId }));
+    vscode.postMessage({
+      type: 'loadBranches',
+      workspaceIndex: review.workspaceIndex,
+      requestId: branchesRequestId,
     });
   }, [dispatch, review.workspaceIndex]);
 
   useEffect(() => {
-    loadCurrentBranch();
-    window.addEventListener('focus', loadCurrentBranch);
-    return (): void => window.removeEventListener('focus', loadCurrentBranch);
-  }, [loadCurrentBranch]);
+    refreshRepository();
+    window.addEventListener('focus', refreshRepository);
+    return (): void => window.removeEventListener('focus', refreshRepository);
+  }, [refreshRepository]);
 
   useEffect(() => {
     const requestId = ++nextStatsRequestId;
@@ -60,7 +70,20 @@ const ReviewPage = (): React.JSX.Element => {
       );
       return;
     }
-    if (review.mode === 'branch' && review.baseBranch.trim().length === 0) {
+    if (review.mode === 'branch' && review.branchesStatus !== 'loaded') {
+      dispatch(
+        diffStatsInvalidated({
+          requestId,
+          message:
+            review.branchesStatus === 'error'
+              ? t('review.branchesUnavailable')
+              : t('review.branchesLoading'),
+          maxDiffChars,
+        }),
+      );
+      return;
+    }
+    if (review.mode === 'branch' && review.baseBranch.length === 0) {
       dispatch(
         diffStatsInvalidated({
           requestId,
@@ -83,7 +106,14 @@ const ReviewPage = (): React.JSX.Element => {
       });
     }, 300);
     return (): void => window.clearTimeout(timeout);
-  }, [dispatch, maxDiffChars, review.baseBranch, review.mode, review.workspaceIndex]);
+  }, [
+    dispatch,
+    maxDiffChars,
+    review.baseBranch,
+    review.branchesStatus,
+    review.mode,
+    review.workspaceIndex,
+  ]);
 
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -131,9 +161,12 @@ const ReviewPage = (): React.JSX.Element => {
             aria-label={t('review.refreshCurrentBranch')}
             title={t('review.refreshCurrentBranch')}
             disabled={
-              workspace === undefined || running || review.currentBranchStatus === 'loading'
+              workspace === undefined ||
+              running ||
+              review.currentBranchStatus === 'loading' ||
+              review.branchesStatus === 'loading'
             }
-            onClick={loadCurrentBranch}
+            onClick={refreshRepository}
           >
             <RefreshCw size={16} aria-hidden="true" />
           </button>
@@ -154,13 +187,28 @@ const ReviewPage = (): React.JSX.Element => {
       </Field>
 
       <Field label={t('review.baseBranch')} htmlFor="base-branch">
-        <input
+        <select
           id="base-branch"
-          value={review.baseBranch}
-          disabled={review.mode !== 'branch' || running}
+          value={review.branchesStatus === 'loaded' ? review.baseBranch : ''}
+          disabled={
+            review.mode !== 'branch' ||
+            running ||
+            review.branchesStatus !== 'loaded' ||
+            review.availableBranches.length === 0
+          }
           onChange={(event) => dispatch(baseBranchChanged(event.target.value))}
           required={review.mode === 'branch'}
-        />
+        >
+          {review.branchesStatus !== 'loaded' || review.availableBranches.length === 0 ? (
+            <option value="">{branchesPlaceholder(review)}</option>
+          ) : (
+            review.availableBranches.map((branch) => (
+              <option key={branch} value={branch}>
+                {branch}
+              </option>
+            ))
+          )}
+        </select>
       </Field>
 
       <ReviewTargets review={review} disabled={running} />
@@ -220,6 +268,12 @@ function currentBranchLabel(review: ReviewState): string {
   }
   if (review.currentBranchStatus === 'error') return t('review.currentBranchUnavailable');
   return review.currentBranch ?? t('review.detachedHead');
+}
+
+function branchesPlaceholder(review: ReviewState): string {
+  return review.branchesStatus === 'error' || review.branchesStatus === 'loaded'
+    ? t('review.branchesUnavailable')
+    : t('review.branchesLoading');
 }
 
 const Metric = ({ value, label }: { value: string | number; label: string }): React.JSX.Element => {

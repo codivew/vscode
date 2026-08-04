@@ -31,6 +31,7 @@ const router = createMemoryRouter([{ path: '*', element: <App /> }], {
 });
 
 connectExtensionMessages(store, (path) => void router.navigate(path));
+
 persistStore(store, {
   getActiveTab: () => pathToTab(router.state.location.pathname),
   subscribe: (listener) => router.subscribe(listener),

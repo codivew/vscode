@@ -12,6 +12,7 @@ import {
   validHttpUrl,
 } from './message-values.js';
 import { getCurrentBranch } from './queries/current-branch.js';
+import { getBranches } from './queries/branches.js';
 import { DiffStatsQuery } from './queries/diff-stats.js';
 import { getOllamaModels } from './queries/ollama-models.js';
 import { saveSettings } from './queries/settings.js';
@@ -54,6 +55,11 @@ export class ReviewMessageHandler {
       }
       case 'loadCurrentBranch': {
         const response = await getCurrentBranch(message);
+        if (response !== undefined) this.post(response);
+        return;
+      }
+      case 'loadBranches': {
+        const response = await getBranches(message);
         if (response !== undefined) this.post(response);
         return;
       }

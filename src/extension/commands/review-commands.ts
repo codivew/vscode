@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ReviewMode } from 'codivew/core';
 import { getLocale, t } from '../../shared/localization.js';
+import { listBaseBranches, type RepositoryBranches } from '../repository/branches.js';
 import type { ReviewController } from '../review/review-controller.js';
 
 export function registerReviewCommands(controller: ReviewController): vscode.Disposable[] {
@@ -30,13 +31,7 @@ function registerReviewCommand(
     const configuredBaseBranch = configuration.get('baseBranch', 'main');
     const baseBranch =
       mode === ReviewMode.BRANCH
-        ? await vscode.window.showInputBox({
-            title: t('host.branchReview'),
-            prompt: t('host.branchPrompt'),
-            value: configuredBaseBranch,
-            validateInput: (value) =>
-              value.trim().length === 0 ? t('host.branchRequired') : undefined,
-          })
+        ? await selectBaseBranch(folder, configuredBaseBranch)
         : configuredBaseBranch;
     if (baseBranch === undefined) return;
 
@@ -52,6 +47,43 @@ function registerReviewCommand(
       openReport: true,
     });
   });
+}
+
+async function selectBaseBranch(
+  folder: vscode.WorkspaceFolder,
+  configuredBranch: string,
+): Promise<string | undefined> {
+  try {
+    const repository = await listBaseBranches(folder.uri.fsPath);
+    if (repository.branches.length === 0) {
+      await vscode.window.showWarningMessage(t('review.branchesUnavailable'));
+      return undefined;
+    }
+    const preferred = preferredBaseBranch(configuredBranch, repository);
+    const branches = [preferred, ...repository.branches.filter((branch) => branch !== preferred)];
+    return vscode.window.showQuickPick(branches, {
+      title: t('host.branchReview'),
+      placeHolder: t('host.branchPrompt'),
+    });
+  } catch {
+    await vscode.window.showWarningMessage(t('review.branchesUnavailable'));
+    return undefined;
+  }
+}
+
+function preferredBaseBranch(configuredBranch: string, repository: RepositoryBranches): string {
+  const preferred = [
+    configuredBranch,
+    repository.defaultBranch,
+    'main',
+    'master',
+    'origin/main',
+    'origin/master',
+  ];
+  return (
+    preferred.find((branch) => branch !== undefined && repository.branches.includes(branch)) ??
+    repository.branches[0]
+  );
 }
 
 async function selectWorkspaceFolder(): Promise<vscode.WorkspaceFolder | undefined> {

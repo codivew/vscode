@@ -129,10 +129,11 @@
   },
   "scripts": {
     "build": "node esbuild.js",
+    "dev": "npm run build && node scripts/open-vscode.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" \"test/**/*.{js,cjs}\" \"*.js\"",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"test/**/*.{cjs,js}\" \"*.{js,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"test/**/*.{cjs,js}\" \"*.{js,json,md}\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" \"scripts/**/*.js\" \"test/**/*.{js,cjs}\" \"*.js\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.js\" \"test/**/*.{cjs,js}\" \"*.{js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.js\" \"test/**/*.{cjs,js}\" \"*.{js,json,md}\"",
     "check": "npm run typecheck && npm run lint",
     "test:extension": "npm run build && node test/run-tests.js",
     "package": "npm run build && vsce package --no-dependencies"

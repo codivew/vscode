@@ -30,6 +30,12 @@ export type LoadCurrentBranchMessage = {
   requestId: unknown;
 };
 
+export type LoadBranchesMessage = {
+  type: 'loadBranches';
+  workspaceIndex: unknown;
+  requestId: unknown;
+};
+
 export type SaveSettingsMessage = {
   type: 'saveSettings';
   workspaceIndex: unknown;
@@ -44,6 +50,7 @@ export type ExtensionMessage =
   | LoadModelsMessage
   | LoadDiffStatsMessage
   | LoadCurrentBranchMessage
+  | LoadBranchesMessage
   | SaveSettingsMessage
   | { type: 'cancel' }
   | { type: 'openFile'; workspaceIndex: unknown; path: unknown }
@@ -121,6 +128,13 @@ export type WebviewMessage =
       requestId: number;
       status: 'loaded' | 'error';
       branch?: string;
+    }
+  | {
+      type: 'branches';
+      requestId: number;
+      status: 'loaded' | 'error';
+      branches: string[];
+      defaultBranch?: string;
     }
   | {
       type: 'settings';

@@ -8,6 +8,7 @@ import type {
 import { t } from '../../../shared/localization.js';
 
 export type DiffStatsStatus = 'idle' | 'loading' | 'loaded' | 'error';
+export type BranchesStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
 export const emptyDiffStats = (maxDiffChars: number): DiffStats => ({
   files: [],
@@ -35,6 +36,9 @@ export type ReviewState = {
   currentBranch?: string;
   currentBranchStatus: 'idle' | 'loading' | 'loaded' | 'error';
   currentBranchRequestId: number;
+  availableBranches: string[];
+  branchesStatus: BranchesStatus;
+  branchesRequestId: number;
 };
 
 const initialState: ReviewState = {
@@ -51,6 +55,9 @@ const initialState: ReviewState = {
   diffStatsRequestId: 0,
   currentBranchStatus: 'idle',
   currentBranchRequestId: 0,
+  availableBranches: [],
+  branchesStatus: 'idle',
+  branchesRequestId: 0,
 };
 
 export const reviewSlice = createSlice({
@@ -82,6 +89,32 @@ export const reviewSlice = createSlice({
       if (action.payload.requestId !== state.currentBranchRequestId) return;
       state.currentBranch = action.payload.branch;
       state.currentBranchStatus = action.payload.status;
+    },
+    branchesRequested(state, action: PayloadAction<{ requestId: number }>) {
+      state.availableBranches = [];
+      state.branchesStatus = 'loading';
+      state.branchesRequestId = action.payload.requestId;
+    },
+    branchesReceived(
+      state,
+      action: PayloadAction<{
+        requestId: number;
+        status: 'loaded' | 'error';
+        branches: string[];
+        defaultBranch?: string;
+      }>,
+    ) {
+      if (action.payload.requestId !== state.branchesRequestId) return;
+      state.availableBranches = action.payload.branches;
+      state.branchesStatus = action.payload.status;
+      state.baseBranch =
+        action.payload.status === 'loaded'
+          ? resolveBaseBranch(
+              state.baseBranch,
+              action.payload.branches,
+              action.payload.defaultBranch,
+            )
+          : '';
     },
     diffStatsInvalidated(
       state,
@@ -153,6 +186,8 @@ export const {
   baseBranchChanged,
   currentBranchRequested,
   currentBranchReceived,
+  branchesRequested,
+  branchesReceived,
   diffStatsInvalidated,
   diffStatsRequested,
   diffStatsReceived,
@@ -160,6 +195,20 @@ export const {
   allFilesSelectionChanged,
   reviewStateReceived,
 } = reviewSlice.actions;
+
+function resolveBaseBranch(
+  selected: string,
+  branches: string[],
+  defaultBranch: string | undefined,
+): string {
+  if (branches.includes(selected)) return selected;
+  const preferred = [defaultBranch, 'main', 'master', 'origin/main', 'origin/master'];
+  return (
+    preferred.find((branch) => branch !== undefined && branches.includes(branch)) ??
+    branches[0] ??
+    ''
+  );
+}
 
 function updateSelectedStats(state: ReviewState): void {
   const selected = new Set(state.selectedFiles);

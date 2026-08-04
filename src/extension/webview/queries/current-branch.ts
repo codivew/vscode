@@ -1,10 +1,7 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import * as vscode from 'vscode';
+import { readCurrentBranch } from '../../repository/branches.js';
 import { numberValue } from '../message-values.js';
 import type { LoadCurrentBranchMessage, WebviewMessage } from '../../../shared/protocol.js';
-
-const execFileAsync = promisify(execFile);
 
 type CurrentBranchResponse = Extract<WebviewMessage, { type: 'currentBranch' }>;
 
@@ -20,13 +17,8 @@ export async function getCurrentBranch(
   if (folder === undefined) return { type: 'currentBranch', requestId, status: 'error' };
 
   try {
-    const { stdout } = await execFileAsync(
-      'git',
-      ['-C', folder.uri.fsPath, 'branch', '--show-current'],
-      { encoding: 'utf8', maxBuffer: 16_384 },
-    );
-    const branch = stdout.trim();
-    return branch.length > 0
+    const branch = await readCurrentBranch(folder.uri.fsPath);
+    return branch !== undefined
       ? { type: 'currentBranch', requestId, status: 'loaded', branch }
       : { type: 'currentBranch', requestId, status: 'loaded' };
   } catch {

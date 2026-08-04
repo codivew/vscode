@@ -29,13 +29,6 @@
       "problemMatcher": []
     },
     {
-      "label": "Codivew: Test Extension (Cursor)",
-      "type": "npm",
-      "script": "test:cursor",
-      "group": "test",
-      "problemMatcher": []
-    },
-    {
       "label": "Codivew: Package Extension",
       "type": "npm",
       "script": "package",
