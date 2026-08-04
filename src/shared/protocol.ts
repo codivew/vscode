@@ -55,7 +55,17 @@ export type ExtensionMessage =
   | { type: 'cancel' }
   | { type: 'openFile'; workspaceIndex: unknown; path: unknown }
   | { type: 'openReport' }
-  | { type: 'openIssue'; reviewId: unknown; issueIndex: unknown };
+  | { type: 'openIssue'; reviewId: unknown; issueIndex: unknown }
+  | { type: 'skipIssue'; reviewId: unknown; issueIndex: unknown; skipped: unknown }
+  | { type: 'reviewEditedFiles' }
+  | { type: 'setDiagnosticsHidden'; hidden: unknown };
+
+export type ReviewIssueStates = {
+  reviewId: string;
+  skippedIssueIndexes: number[];
+  editedIssueIndexes: number[];
+  diagnosticsHidden: boolean;
+};
 
 export type DiffStats = {
   files: DiffFileStats[];
@@ -144,7 +154,8 @@ export type WebviewMessage =
       setupComplete?: boolean;
       language?: LanguagePreference;
       locale?: Locale;
-    };
+    }
+  | { type: 'issueStates'; states: ReviewIssueStates };
 
 export type WebviewInitialState = {
   locale: Locale;

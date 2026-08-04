@@ -7,10 +7,12 @@ const DIAGNOSTIC_SOURCE = 'Codivew';
 export function publishDiagnostics(
   result: RunReviewResult,
   collection: vscode.DiagnosticCollection,
+  skippedIssueIndexes: ReadonlySet<number> = new Set(),
 ): void {
   const diagnosticsByFile = new Map<string, { uri: vscode.Uri; items: vscode.Diagnostic[] }>();
 
-  for (const issue of result.json.result.issues) {
+  for (const [index, issue] of result.json.result.issues.entries()) {
+    if (skippedIssueIndexes.has(index)) continue;
     const uri = workspaceFileUri(result.repositoryRoot, issue.file);
     if (uri === undefined) continue;
     const entry = diagnosticsByFile.get(uri.toString()) ?? { uri, items: [] };

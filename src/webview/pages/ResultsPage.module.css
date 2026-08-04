@@ -147,6 +147,14 @@
   border-left-color: var(--vscode-editorWarning-foreground, #cca700);
 }
 
+.issue[data-skipped='true'] {
+  opacity: 0.58;
+}
+
+.issue[data-edited='true']:not([data-skipped='true']) {
+  border-left-color: var(--vscode-charts-blue, var(--vscode-focusBorder));
+}
+
 .issueMeta {
   display: flex;
   flex-wrap: wrap;
@@ -157,6 +165,16 @@
 
 .severity {
   color: var(--vscode-foreground);
+  font-weight: 700;
+}
+
+.skipped {
+  color: var(--vscode-disabledForeground);
+  font-weight: 700;
+}
+
+.edited {
+  color: var(--vscode-charts-blue, var(--vscode-focusBorder));
   font-weight: 700;
 }
 
@@ -198,20 +216,55 @@
 }
 
 .openButton,
+.skipButton,
+.clearButton,
+.reviewEditedButton,
 .reportButton {
   width: 100%;
 }
 
-.openButton {
-  min-height: 27px;
+.resultActions {
+  display: grid;
+  gap: 7px;
+}
+
+.clearButton,
+.reviewEditedButton {
+  min-height: 30px;
+}
+
+.clearButton {
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+}
+
+.clearButton:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.reviewEditedButton:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.issueActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
   margin-top: 9px;
+}
+
+.openButton,
+.skipButton {
+  min-height: 27px;
   padding: 4px 8px;
   color: var(--vscode-button-secondaryForeground);
   background: var(--vscode-button-secondaryBackground);
   font-size: 10px;
 }
 
-.openButton:hover {
+.openButton:hover,
+.skipButton:hover {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 

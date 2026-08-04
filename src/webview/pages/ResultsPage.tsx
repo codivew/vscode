@@ -2,15 +2,20 @@
 import React, { useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { t } from '../../shared/localization.js';
-import { useAppSelector } from '../app/hooks.js';
+import { useAppDispatch, useAppSelector } from '../app/hooks.js';
 import { vscode } from '../app/vscode-api.js';
 import type { ReviewIssueSummary } from '../../shared/protocol.js';
+import { issueSkipChanged } from '../features/review/reviewSlice.js';
 import styles from './ResultsPage.module.css';
 
 type SeverityFilter = 'all' | ReviewIssueSummary['severity'];
 
 const ResultsPage = (): React.JSX.Element => {
   const result = useAppSelector((state) => state.review.result);
+  const skippedIssueIndexes = useAppSelector((state) => state.review.skippedIssueIndexes);
+  const editedIssueIndexes = useAppSelector((state) => state.review.editedIssueIndexes);
+  const diagnosticsHidden = useAppSelector((state) => state.review.diagnosticsHidden);
+  const reviewStatus = useAppSelector((state) => state.review.status);
   const [filter, setFilter] = useState<SeverityFilter>('all');
   const groups = useMemo(() => {
     if (result === undefined) return [];
@@ -26,6 +31,15 @@ const ResultsPage = (): React.JSX.Element => {
   }, [filter, result]);
 
   if (result === undefined) return <Navigate to="/review" replace />;
+
+  const editedFiles = new Set(
+    result.issues
+      .filter(
+        (issue) =>
+          editedIssueIndexes.includes(issue.index) && !skippedIssueIndexes.includes(issue.index),
+      )
+      .map((issue) => issue.file),
+  );
 
   return (
     <section className={styles.results} aria-labelledby="results-title">
@@ -71,7 +85,13 @@ const ResultsPage = (): React.JSX.Element => {
               <h3 title={file}>{file}</h3>
               <div className={styles.issueList}>
                 {issues.map((issue) => (
-                  <IssueCard key={issue.index} issue={issue} reviewId={result.reviewId} />
+                  <IssueCard
+                    key={issue.index}
+                    issue={issue}
+                    reviewId={result.reviewId}
+                    skipped={skippedIssueIndexes.includes(issue.index)}
+                    edited={editedIssueIndexes.includes(issue.index)}
+                  />
                 ))}
               </div>
             </section>
@@ -90,13 +110,36 @@ const ResultsPage = (): React.JSX.Element => {
         </section>
       )}
 
-      <button
-        className={styles.reportButton}
-        type="button"
-        onClick={() => vscode.postMessage({ type: 'openReport' })}
-      >
-        {t('results.openReport')}
-      </button>
+      <div className={styles.resultActions}>
+        {editedFiles.size > 0 && (
+          <button
+            className={styles.reviewEditedButton}
+            type="button"
+            disabled={reviewStatus === 'running'}
+            onClick={() => vscode.postMessage({ type: 'reviewEditedFiles' })}
+          >
+            {reviewStatus === 'running'
+              ? t('results.reviewingEditedFiles')
+              : t('results.reviewEditedFiles')}
+          </button>
+        )}
+        <button
+          className={styles.clearButton}
+          type="button"
+          onClick={() =>
+            vscode.postMessage({ type: 'setDiagnosticsHidden', hidden: !diagnosticsHidden })
+          }
+        >
+          {diagnosticsHidden ? t('results.restoreUnderlines') : t('results.clearUnderlines')}
+        </button>
+        <button
+          className={styles.reportButton}
+          type="button"
+          onClick={() => vscode.postMessage({ type: 'openReport' })}
+        >
+          {t('results.openReport')}
+        </button>
+      </div>
     </section>
   );
 };
@@ -111,39 +154,71 @@ const Metric = ({ label, value }: { label: string; value: string | number }): Re
 const IssueCard = ({
   issue,
   reviewId,
+  skipped,
+  edited,
 }: {
   issue: ReviewIssueSummary;
   reviewId: string;
-}): React.JSX.Element => (
-  <article className={styles.issue} data-severity={issue.severity}>
-    <div className={styles.issueMeta}>
-      <span className={styles.severity}>{severityLabel(issue.severity)}</span>
-      <span>{locationLabel(issue)}</span>
-      <span>{t('results.confidence', { value: Math.round(issue.confidence * 100) })}</span>
-    </div>
-    <h4>{issue.title}</h4>
-    <p>{issue.description}</p>
-    {issue.impact !== undefined && <Detail label={t('results.impact')} value={issue.impact} />}
-    {issue.suggestion !== undefined && (
-      <Detail label={t('results.fixSuggestion')} value={issue.suggestion} />
-    )}
-    {issue.codeSnippet !== undefined && (
-      <div className={styles.code}>
-        <strong>{t('results.codeSnippet')}</strong>
-        <pre>
-          <code>{issue.codeSnippet}</code>
-        </pre>
-      </div>
-    )}
-    <button
-      className={styles.openButton}
-      type="button"
-      onClick={() => vscode.postMessage({ type: 'openIssue', reviewId, issueIndex: issue.index })}
+  skipped: boolean;
+  edited: boolean;
+}): React.JSX.Element => {
+  const dispatch = useAppDispatch();
+  const setSkipped = (): void => {
+    const nextSkipped = !skipped;
+    dispatch(issueSkipChanged({ issueIndex: issue.index, skipped: nextSkipped }));
+    vscode.postMessage({
+      type: 'skipIssue',
+      reviewId,
+      issueIndex: issue.index,
+      skipped: nextSkipped,
+    });
+  };
+
+  return (
+    <article
+      className={styles.issue}
+      data-severity={issue.severity}
+      data-skipped={skipped}
+      data-edited={edited}
     >
-      {t('results.openIssue')}
-    </button>
-  </article>
-);
+      <div className={styles.issueMeta}>
+        <span className={styles.severity}>{severityLabel(issue.severity)}</span>
+        <span>{locationLabel(issue)}</span>
+        <span>{t('results.confidence', { value: Math.round(issue.confidence * 100) })}</span>
+        {skipped && <span className={styles.skipped}>{t('results.skipped')}</span>}
+        {!skipped && edited && <span className={styles.edited}>{t('results.edited')}</span>}
+      </div>
+      <h4>{issue.title}</h4>
+      <p>{issue.description}</p>
+      {issue.impact !== undefined && <Detail label={t('results.impact')} value={issue.impact} />}
+      {issue.suggestion !== undefined && (
+        <Detail label={t('results.fixSuggestion')} value={issue.suggestion} />
+      )}
+      {issue.codeSnippet !== undefined && (
+        <div className={styles.code}>
+          <strong>{t('results.codeSnippet')}</strong>
+          <pre>
+            <code>{issue.codeSnippet}</code>
+          </pre>
+        </div>
+      )}
+      <div className={styles.issueActions}>
+        <button
+          className={styles.openButton}
+          type="button"
+          onClick={() =>
+            vscode.postMessage({ type: 'openIssue', reviewId, issueIndex: issue.index })
+          }
+        >
+          {t('results.openIssue')}
+        </button>
+        <button className={styles.skipButton} type="button" onClick={setSkipped}>
+          {skipped ? t('results.restoreIssue') : t('results.skipIssue')}
+        </button>
+      </div>
+    </article>
+  );
+};
 
 const Detail = ({ label, value }: { label: string; value: string }): React.JSX.Element => (
   <div className={styles.detail}>

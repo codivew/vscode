@@ -8,7 +8,9 @@ import {
   type RunReviewResult,
 } from 'codivew/core';
 import { t } from '../../shared/localization.js';
+import type { ReviewIssueStates } from '../../shared/protocol.js';
 import { ResultsPresenter } from '../results/presenter.js';
+import { workspaceFileUri } from '../results/navigation.js';
 import { executeReview } from './review-runner.js';
 
 export type ReviewInput = {
@@ -34,6 +36,9 @@ export type ReviewHooks = {
 export class ReviewController {
   private activeController: AbortController | undefined;
   private latestResult: RunReviewResult | undefined;
+  private latestInput: ReviewInput | undefined;
+  private readonly issueStatesEmitter = new vscode.EventEmitter<ReviewIssueStates>();
+  readonly onDidChangeIssueStates = this.issueStatesEmitter.event;
 
   constructor(private readonly presenter: ResultsPresenter) {}
 
@@ -82,6 +87,7 @@ export class ReviewController {
       );
 
       this.latestResult = result;
+      this.latestInput = input;
       this.presenter.publish(result);
       if (input.openReport) this.presenter.openReport(result);
       hooks.onCompleted?.(result);
@@ -137,6 +143,60 @@ export class ReviewController {
       return;
     }
     await this.presenter.openIssue(result, issueIndex);
+  }
+
+  setIssueSkipped(reviewId: string, issueIndex: number, skipped: boolean): boolean {
+    const result = this.latestResult?.reviewId === reviewId ? this.latestResult : undefined;
+    if (result === undefined || result.json.result.issues[issueIndex] === undefined) return false;
+    this.presenter.setIssueSkipped(result, issueIndex, skipped);
+    this.emitIssueStates(result);
+    return true;
+  }
+
+  setDiagnosticsHidden(hidden: boolean): boolean {
+    const result = this.latestResult;
+    if (result === undefined) return false;
+    this.presenter.setDiagnosticsHidden(result, hidden);
+    this.emitIssueStates(result);
+    return true;
+  }
+
+  handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
+    const result = this.latestResult;
+    if (result === undefined || !this.presenter.handleDocumentChange(result, event)) return;
+    this.emitIssueStates(result);
+  }
+
+  async rerunEditedFiles(hooks: ReviewHooks = {}): Promise<RunReviewResult | undefined> {
+    const result = this.latestResult;
+    const input = this.latestInput;
+    if (result === undefined || input === undefined) return undefined;
+    const selectedFiles = this.presenter.editedFiles(result);
+    if (selectedFiles.length === 0) return undefined;
+    for (const file of selectedFiles) {
+      const uri = workspaceFileUri(result.repositoryRoot, file);
+      const document = vscode.workspace.textDocuments.find(
+        (candidate) => candidate.uri.toString() === uri?.toString(),
+      );
+      if (document?.isDirty && !(await document.save())) {
+        hooks.onError?.(t('host.saveEditedFailed', { file }));
+        return undefined;
+      }
+    }
+    return this.run({ ...input, selectedFiles, openReport: false }, hooks);
+  }
+
+  hasEditedFiles(): boolean {
+    const result = this.latestResult;
+    return result !== undefined && this.presenter.editedFiles(result).length > 0;
+  }
+
+  dispose(): void {
+    this.issueStatesEmitter.dispose();
+  }
+
+  private emitIssueStates(result: RunReviewResult): void {
+    this.issueStatesEmitter.fire(this.presenter.issueStates(result));
   }
 
   openFile(folder: vscode.WorkspaceFolder, file: string): Promise<void> {

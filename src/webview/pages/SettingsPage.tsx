@@ -28,7 +28,7 @@ const SettingsPage = (): React.JSX.Element => {
     hasWorkspace &&
     validHttpUrl(ollama.url) !== undefined &&
     ollama.model.trim().length > 0 &&
-    (settings.setupComplete || hasModels);
+    (settings.isSetupComplete || hasModels);
 
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -50,7 +50,7 @@ const SettingsPage = (): React.JSX.Element => {
           AI
         </span>
         <div>
-          <h2>{settings.setupComplete ? t('settings.title') : t('settings.getStarted')}</h2>
+          <h2>{settings.isSetupComplete ? t('settings.title') : t('settings.getStarted')}</h2>
           <p>{t('settings.description')}</p>
         </div>
       </div>
@@ -135,7 +135,7 @@ const SettingsPage = (): React.JSX.Element => {
       >
         {settings.status === 'saving'
           ? t('settings.saving')
-          : settings.setupComplete
+          : settings.isSetupComplete
             ? t('settings.save')
             : t('settings.saveAndStart')}
       </button>

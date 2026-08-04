@@ -4,6 +4,7 @@
   "command.reviewStaged": "Codivew: Review Staged Changes",
   "command.reviewBranch": "Codivew: Review Branch Changes",
   "command.openLatestReport": "Codivew: Open Latest Report",
+  "command.clearDiagnostics": "Codivew: Clear All Review Underlines",
   "view.codeReview": "Code Review",
   "config.language": "Language used by the Codivew interface, review feedback, and reports.",
   "config.language.auto": "Follow the VS Code display language.",

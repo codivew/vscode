@@ -6,6 +6,7 @@ import type {
   WebviewInitialState,
 } from '../../../shared/protocol.js';
 import { t } from '../../../shared/localization.js';
+import type { RootState } from '../../app/store.js';
 
 export type DiffStatsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 export type BranchesStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -28,6 +29,9 @@ export type ReviewState = {
   status: ReviewStatus;
   statusMessage: string;
   result?: ReviewResultSummary;
+  skippedIssueIndexes: number[];
+  editedIssueIndexes: number[];
+  diagnosticsHidden: boolean;
   diffStats: DiffStats;
   selectedFiles: string[];
   diffStatsStatus: DiffStatsStatus;
@@ -48,6 +52,9 @@ const initialState: ReviewState = {
   baseBranch: 'main',
   status: 'idle',
   statusMessage: t('review.ready'),
+  skippedIssueIndexes: [],
+  editedIssueIndexes: [],
+  diagnosticsHidden: false,
   diffStats: emptyDiffStats(120_000),
   selectedFiles: [],
   diffStatsStatus: 'idle',
@@ -175,7 +182,30 @@ export const reviewSlice = createSlice({
       state.statusMessage = action.payload.message;
       if (action.payload.status === 'completed' && action.payload.result !== undefined) {
         state.result = action.payload.result;
+        state.skippedIssueIndexes = [];
+        state.editedIssueIndexes = [];
+        state.diagnosticsHidden = false;
       }
+    },
+    issueSkipChanged(state, action: PayloadAction<{ issueIndex: number; skipped: boolean }>) {
+      const skipped = new Set(state.skippedIssueIndexes);
+      if (action.payload.skipped) skipped.add(action.payload.issueIndex);
+      else skipped.delete(action.payload.issueIndex);
+      state.skippedIssueIndexes = [...skipped];
+    },
+    issueStatesReceived(
+      state,
+      action: PayloadAction<{
+        reviewId: string;
+        skippedIssueIndexes: number[];
+        editedIssueIndexes: number[];
+        diagnosticsHidden: boolean;
+      }>,
+    ) {
+      if (state.result?.reviewId !== action.payload.reviewId) return;
+      state.skippedIssueIndexes = action.payload.skippedIssueIndexes;
+      state.editedIssueIndexes = action.payload.editedIssueIndexes;
+      state.diagnosticsHidden = action.payload.diagnosticsHidden;
     },
   },
 });
@@ -194,6 +224,8 @@ export const {
   fileSelectionChanged,
   allFilesSelectionChanged,
   reviewStateReceived,
+  issueSkipChanged,
+  issueStatesReceived,
 } = reviewSlice.actions;
 
 function resolveBaseBranch(
@@ -225,3 +257,5 @@ function updateSelectedStats(state: ReviewState): void {
     0,
   );
 }
+
+export const selectHasResult = (state: RootState): boolean => state.review.result !== undefined;

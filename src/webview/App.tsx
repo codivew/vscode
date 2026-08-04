@@ -1,12 +1,13 @@
 /** @jsxImportSource react */
 import React from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
-import NavigationTabs from './features/navigation/components/NavigationTabs.js';
+import NavigationTabs from './features/navigation/Navigation.js';
 import ReviewPage from './pages/ReviewPage.js';
 import ResultsPage from './pages/ResultsPage.js';
 import SettingsPage from './pages/SettingsPage.js';
 import { useAppSelector } from './app/hooks.js';
 import './global.css';
+import { selectIsSetupComplete } from './features/settings/settingsSlice.js';
 
 const App = (): React.JSX.Element => {
   const locale = useAppSelector((state) => state.settings.locale);
@@ -26,7 +27,7 @@ const App = (): React.JSX.Element => {
 };
 
 const SetupGuard = (): React.JSX.Element => {
-  const setupComplete = useAppSelector((state) => state.settings.setupComplete);
+  const setupComplete = useAppSelector(selectIsSetupComplete);
   return setupComplete ? <Outlet /> : <Navigate to="/settings" replace />;
 };
 

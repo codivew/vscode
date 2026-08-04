@@ -15,6 +15,7 @@ async function run() {
   assert.ok(commands.includes('codivew.reviewStaged'));
   assert.ok(commands.includes('codivew.reviewBranch'));
   assert.ok(commands.includes('codivew.openIssue'));
+  assert.ok(commands.includes('codivew.clearDiagnostics'));
   assert.ok(commands.includes('codivew.reviewView.focus'));
   console.log('✓ activates and registers review commands');
 
@@ -45,6 +46,15 @@ async function run() {
   assert.equal(path.basename(editor.document.uri.fsPath), 'value.ts');
   assert.equal(editor.selection.start.line, 0);
   console.log('✓ opens a review issue at its source line');
+
+  const edit = new vscode.WorkspaceEdit();
+  edit.insert(editor.document.uri, new vscode.Position(0, 0), ' ');
+  assert.equal(await vscode.workspace.applyEdit(edit), true);
+  const diagnosticsAfterEdit = vscode.languages
+    .getDiagnostics(editor.document.uri)
+    .filter((diagnostic) => diagnostic.source === 'Codivew');
+  assert.equal(diagnosticsAfterEdit.length, 0);
+  console.log('✓ clears an issue diagnostic when its reviewed range is edited');
 }
 
 module.exports = { run };

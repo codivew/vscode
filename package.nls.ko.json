@@ -4,6 +4,7 @@
   "command.reviewStaged": "Codivew: 스테이징된 변경사항 리뷰",
   "command.reviewBranch": "Codivew: 브랜치 변경사항 리뷰",
   "command.openLatestReport": "Codivew: 최신 리포트 열기",
+  "command.clearDiagnostics": "Codivew: 모든 리뷰 밑줄 지우기",
   "view.codeReview": "코드 리뷰",
   "config.language": "Codivew 화면, 리뷰 피드백 및 리포트에 사용할 언어입니다.",
   "config.language.auto": "VS Code 표시 언어를 따릅니다.",
