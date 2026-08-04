@@ -39,7 +39,8 @@ export type ExtensionMessage =
   | LoadDiffStatsMessage
   | SaveSettingsMessage
   | { type: 'cancel' }
-  | { type: 'openReport' };
+  | { type: 'openReport' }
+  | { type: 'openIssue'; reviewId: unknown; issueIndex: unknown };
 
 export type DiffStats = {
   files: DiffFileStats[];
@@ -60,9 +61,28 @@ export type DiffFileStats = {
 };
 
 export type ReviewResultSummary = {
+  reviewId: string;
   verdict: string;
+  risk: 'low' | 'medium' | 'high';
+  summary: string;
   reviewedFileCount: number;
   issueCount: number;
+  tests: string[];
+  issues: ReviewIssueSummary[];
+};
+
+export type ReviewIssueSummary = {
+  index: number;
+  severity: 'must_fix' | 'should_fix' | 'suggestion';
+  confidence: number;
+  file: string;
+  line: number;
+  endLine?: number;
+  title: string;
+  description: string;
+  impact?: string;
+  suggestion?: string;
+  codeSnippet?: string;
 };
 
 export type ReviewStatus = 'idle' | 'running' | 'completed' | 'cancelled' | 'error';

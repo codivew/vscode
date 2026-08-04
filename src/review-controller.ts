@@ -132,6 +132,52 @@ export class ReviewController {
     this.openReport(this.latestResult);
   }
 
+  async openIssue(reviewId: string, issueIndex: number): Promise<void> {
+    const result = this.latestResult;
+    const issue = result?.reviewId === reviewId ? result.json.result.issues[issueIndex] : undefined;
+    if (result === undefined || issue === undefined) {
+      await vscode.window.showWarningMessage(t('host.issueUnavailable'));
+      return;
+    }
+
+    const uri = reviewFileUri(result, issue.file);
+    if (uri === undefined) {
+      await vscode.window.showWarningMessage(t('host.issueUnavailable'));
+      return;
+    }
+
+    try {
+      const document = await vscode.workspace.openTextDocument(uri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+        preserveFocus: false,
+      });
+      const startLine = Math.min(Math.max(0, issue.line - 1), document.lineCount - 1);
+      const endLine = Math.min(
+        Math.max(startLine, (issue.endLine ?? issue.line) - 1),
+        document.lineCount - 1,
+      );
+      const range = new vscode.Range(
+        new vscode.Position(startLine, 0),
+        document.lineAt(endLine).range.end,
+      );
+      editor.selection = new vscode.Selection(range.start, range.end);
+      editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await vscode.window.showErrorMessage(t('host.issueFileError', { message }));
+    }
+  }
+
+  async openLatestIssue(issueIndex: number): Promise<void> {
+    const reviewId = this.latestResult?.reviewId;
+    if (reviewId === undefined) {
+      await vscode.window.showWarningMessage(t('host.issueUnavailable'));
+      return;
+    }
+    await this.openIssue(reviewId, issueIndex);
+  }
+
   private openReport(result: RunReviewResult): void {
     const panel = vscode.window.createWebviewPanel(
       'codivew.reviewReport',
@@ -210,11 +256,8 @@ function publishDiagnostics(
   const diagnosticsByFile = new Map<string, { uri: vscode.Uri; items: vscode.Diagnostic[] }>();
 
   for (const issue of result.json.result.issues) {
-    const absolutePath = resolve(result.repositoryRoot, issue.file);
-    const relativePath = relative(result.repositoryRoot, absolutePath);
-    if (isAbsolute(relativePath) || relativePath.startsWith('..')) continue;
-
-    const uri = vscode.Uri.file(absolutePath);
+    const uri = reviewFileUri(result, issue.file);
+    if (uri === undefined) continue;
     const entry = diagnosticsByFile.get(uri.toString()) ?? { uri, items: [] };
     entry.items.push(createDiagnostic(issue));
     diagnosticsByFile.set(uri.toString(), entry);
@@ -222,6 +265,13 @@ function publishDiagnostics(
 
   collection.clear();
   collection.set([...diagnosticsByFile.values()].map(({ uri, items }) => [uri, items]));
+}
+
+function reviewFileUri(result: RunReviewResult, file: string): vscode.Uri | undefined {
+  const absolutePath = resolve(result.repositoryRoot, file);
+  const relativePath = relative(result.repositoryRoot, absolutePath);
+  if (isAbsolute(relativePath) || relativePath.startsWith('..')) return undefined;
+  return vscode.Uri.file(absolutePath);
 }
 
 function createDiagnostic(issue: ReviewIssue): vscode.Diagnostic {

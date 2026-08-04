@@ -4,7 +4,7 @@ export type PersistedState = {
   workspaceIndex: number;
   mode: string;
   baseBranch: string;
-  activeTab: 'review' | 'settings';
+  activeTab: 'review' | 'results' | 'settings';
   maxDiffChars: number;
   maxDiffCharsDraft: number;
 };

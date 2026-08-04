@@ -3,6 +3,7 @@ import React from 'react';
 import NavigationTabs from './features/navigation/components/NavigationTabs.js';
 import ReviewTab from './features/review/components/ReviewTab.js';
 import SettingsTab from './features/settings/components/SettingsTab.js';
+import ResultsTab from './features/results/components/ResultsTab.js';
 import { useAppSelector } from './app/hooks.js';
 import './global.css';
 import { t } from '../localization.js';
@@ -18,7 +19,15 @@ const App = (): React.JSX.Element => {
         <p className="appLead">{setupComplete ? t('app.ready') : t('app.setup')}</p>
       </header>
       {setupComplete && <NavigationTabs />}
-      {!setupComplete || activeTab === 'settings' ? <SettingsTab /> : <ReviewTab />}
+      {!setupComplete ? (
+        <SettingsTab />
+      ) : activeTab === 'settings' ? (
+        <SettingsTab />
+      ) : activeTab === 'results' ? (
+        <ResultsTab />
+      ) : (
+        <ReviewTab />
+      )}
     </main>
   );
 };

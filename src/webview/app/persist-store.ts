@@ -8,7 +8,7 @@ export function persistStore(store: AppStore): () => void {
       workspaceIndex: state.review.workspaceIndex,
       mode: state.review.mode,
       baseBranch: state.review.baseBranch,
-      activeTab: state.navigation.activeTab,
+      activeTab: state.navigation.activeTab === 'results' ? 'review' : state.navigation.activeTab,
       maxDiffChars: state.settings.maxDiffChars,
       maxDiffCharsDraft: state.settings.draftMaxDiffChars,
     });
