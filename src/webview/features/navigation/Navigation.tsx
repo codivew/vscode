@@ -1,14 +1,17 @@
 /** @jsxImportSource react */
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../../app/hooks.js';
-import styles from './NavigationTabs.module.css';
-import { t } from '../../../../shared/localization.js';
+import { useAppSelector } from '../../app/hooks.js';
+import styles from './Navigation.module.css';
+import { t } from '../../../shared/localization.js';
+import { selectIsSetupComplete } from '../settings/settingsSlice.js';
+import { selectHasResult } from '../review/reviewSlice.js';
 
 const NavigationTabs = (): React.JSX.Element | null => {
   const { pathname } = useLocation();
-  const setupComplete = useAppSelector((state) => state.settings.setupComplete);
-  const hasResult = useAppSelector((state) => state.review.result !== undefined);
+  const setupComplete = useAppSelector(selectIsSetupComplete);
+  const hasResult = useAppSelector(selectHasResult);
+
   if (!setupComplete) return null;
 
   const tabs = [

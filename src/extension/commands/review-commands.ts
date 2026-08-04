@@ -15,6 +15,11 @@ export function registerReviewCommands(controller: ReviewController): vscode.Dis
     vscode.commands.registerCommand('codivew.openIssue', (issueIndex: number) =>
       controller.openLatestIssue(issueIndex),
     ),
+    vscode.commands.registerCommand('codivew.clearDiagnostics', () => {
+      if (!controller.setDiagnosticsHidden(true)) {
+        void vscode.window.showInformationMessage(t('host.noReport'));
+      }
+    }),
   ];
 }
 

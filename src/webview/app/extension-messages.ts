@@ -3,6 +3,7 @@ import {
   branchesReceived,
   currentBranchReceived,
   diffStatsReceived,
+  issueStatesReceived,
   reviewStateReceived,
 } from '../features/review/reviewSlice.js';
 import { settingsReceived } from '../features/settings/settingsSlice.js';
@@ -32,13 +33,26 @@ export function connectExtensionMessages(
       return;
     }
     if (data.type === 'settings') {
-      const completingSetup = !store.getState().settings.setupComplete;
+      const completingSetup = !store.getState().settings.isSetupComplete;
       if (data.locale !== undefined) {
         setLocale(data.locale);
         document.documentElement.lang = data.locale;
       }
-      store.dispatch(settingsReceived(data));
+      store.dispatch(
+        settingsReceived({
+          status: data.status,
+          message: data.message,
+          maxDiffChars: data.maxDiffChars,
+          isSetupComplete: data.setupComplete,
+          language: data.language,
+          locale: data.locale,
+        }),
+      );
       if (data.status === 'saved' && completingSetup) navigate('/review');
+      return;
+    }
+    if (data.type === 'issueStates') {
+      store.dispatch(issueStatesReceived(data.states));
       return;
     }
     store.dispatch(reviewStateReceived(data));

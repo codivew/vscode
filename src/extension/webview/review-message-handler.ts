@@ -40,6 +40,17 @@ export class ReviewMessageHandler {
       case 'openIssue':
         await this.openIssue(message.reviewId, message.issueIndex);
         return;
+      case 'skipIssue':
+        this.skipIssue(message.reviewId, message.issueIndex, message.skipped);
+        return;
+      case 'setDiagnosticsHidden':
+        if (typeof message.hidden === 'boolean') {
+          this.controller.setDiagnosticsHidden(message.hidden);
+        }
+        return;
+      case 'reviewEditedFiles':
+        await this.reviewEditedFiles();
+        return;
       case 'openFile':
         await this.openFile(message.workspaceIndex, message.path);
         return;
@@ -77,6 +88,15 @@ export class ReviewMessageHandler {
     if (reviewId !== undefined && issueIndex !== undefined) {
       await this.controller.openIssue(reviewId, issueIndex);
     }
+  }
+
+  private skipIssue(reviewIdValue: unknown, issueIndexValue: unknown, skippedValue: unknown): void {
+    const reviewId = stringValue(reviewIdValue);
+    const issueIndex = numberValue(issueIndexValue);
+    if (reviewId === undefined || issueIndex === undefined || typeof skippedValue !== 'boolean') {
+      return;
+    }
+    this.controller.setIssueSkipped(reviewId, issueIndex, skippedValue);
   }
 
   private async openFile(workspaceIndexValue: unknown, pathValue: unknown): Promise<void> {
@@ -156,6 +176,20 @@ export class ReviewMessageHandler {
         onError: (errorMessage) => this.postState('error', errorMessage),
       },
     );
+  }
+
+  private async reviewEditedFiles(): Promise<void> {
+    if (!this.controller.hasEditedFiles()) {
+      this.postState('error', t('host.noEditedIssues'));
+      return;
+    }
+    this.postState('running', t('host.preparingEditedReview'));
+    await this.controller.rerunEditedFiles({
+      onProgress: (stage) => this.postProgress(stage),
+      onCompleted: (completed) => this.postCompleted(completed),
+      onCancelled: () => this.postState('cancelled', t('host.cancelled')),
+      onError: (errorMessage) => this.postState('error', errorMessage),
+    });
   }
 
   private postProgress(stage: ReviewProgressStage): void {

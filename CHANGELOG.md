@@ -2,6 +2,24 @@
 
 All notable changes to Codivew for VS Code are documented in this file.
 
+## 0.2.3
+
+### Added
+
+- Per-finding Skip and Restore actions that immediately remove or restore the corresponding editor
+  underline while keeping the finding visible in Results.
+- Automatic underline removal when the reviewed source range is edited, with an
+  `Edited · review needed` state on the result card.
+- Selective re-reviewing of edited files from Results, including saving dirty files before the
+  review starts.
+- Controls and a Command Palette action for clearing all Codivew review underlines, with an option
+  to restore active underlines from Results.
+
+### Fixed
+
+- Setup completion state now consistently uses `isSetupComplete` internally and correctly maps the
+  extension protocol's `setupComplete` response into the webview store.
+
 ## 0.2.2
 
 ### Added

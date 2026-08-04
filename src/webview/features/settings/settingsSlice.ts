@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t, type LanguagePreference, type Locale } from '../../../shared/localization.js';
+import type { RootState } from '../../app/store.js';
 
 export type SettingsStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -9,7 +10,7 @@ export type SettingsState = {
   language: LanguagePreference;
   draftLanguage: LanguagePreference;
   locale: Locale;
-  setupComplete: boolean;
+  isSetupComplete: boolean;
   status: SettingsStatus;
   message: string;
 };
@@ -20,7 +21,7 @@ const initialState: SettingsState = {
   language: 'auto',
   draftLanguage: 'auto',
   locale: 'en',
-  setupComplete: false,
+  isSetupComplete: false,
   status: 'idle',
   message: t('settings.diffDescription'),
 };
@@ -49,7 +50,7 @@ export const settingsSlice = createSlice({
         status: 'saved' | 'error';
         message: string;
         maxDiffChars?: number;
-        setupComplete?: boolean;
+        isSetupComplete?: boolean;
         language?: LanguagePreference;
         locale?: Locale;
       }>,
@@ -60,8 +61,8 @@ export const settingsSlice = createSlice({
         state.maxDiffChars = action.payload.maxDiffChars;
         state.draftMaxDiffChars = action.payload.maxDiffChars;
       }
-      if (action.payload.setupComplete !== undefined) {
-        state.setupComplete = action.payload.setupComplete;
+      if (action.payload.isSetupComplete !== undefined) {
+        state.isSetupComplete = action.payload.isSetupComplete;
       }
       if (action.payload.language !== undefined) {
         state.language = action.payload.language;
@@ -78,3 +79,5 @@ export const {
   settingsSaveRequested,
   settingsReceived,
 } = settingsSlice.actions;
+
+export const selectIsSetupComplete = (state: RootState): boolean => state.settings.isSetupComplete;

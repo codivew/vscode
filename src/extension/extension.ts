@@ -21,6 +21,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     diagnostics,
+    controller,
+    provider,
+    vscode.workspace.onDidChangeTextDocument((event) => controller.handleDocumentChange(event)),
     vscode.window.registerWebviewViewProvider(ReviewViewProvider.viewType, provider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
