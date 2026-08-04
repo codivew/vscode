@@ -15,6 +15,7 @@ import { loadModels } from './model-loader.js';
 import { getInitialState, saveSettings } from './settings.js';
 import type { ExtensionMessage, ReviewMessage, WebviewMessage } from '../shared/protocol.js';
 import { createWebviewDocument } from './webview-document.js';
+import { loadCurrentBranch } from './current-branch-loader.js';
 
 export class ReviewViewProvider implements vscode.WebviewViewProvider {
   static readonly viewType = 'codivew.reviewView';
@@ -61,6 +62,11 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
       }
       case 'loadDiffStats': {
         const response = await this.diffStats.load(message);
+        if (response !== undefined) this.post(response);
+        return;
+      }
+      case 'loadCurrentBranch': {
+        const response = await loadCurrentBranch(message);
         if (response !== undefined) this.post(response);
         return;
       }

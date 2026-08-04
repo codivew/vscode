@@ -24,6 +24,12 @@ export type LoadDiffStatsMessage = {
   maxDiffChars: unknown;
 };
 
+export type LoadCurrentBranchMessage = {
+  type: 'loadCurrentBranch';
+  workspaceIndex: unknown;
+  requestId: unknown;
+};
+
 export type SaveSettingsMessage = {
   type: 'saveSettings';
   workspaceIndex: unknown;
@@ -37,6 +43,7 @@ export type ExtensionMessage =
   | ReviewMessage
   | LoadModelsMessage
   | LoadDiffStatsMessage
+  | LoadCurrentBranchMessage
   | SaveSettingsMessage
   | { type: 'cancel' }
   | { type: 'openFile'; workspaceIndex: unknown; path: unknown }
@@ -108,6 +115,12 @@ export type WebviewMessage =
       status: 'loaded' | 'error';
       stats?: DiffStats;
       message: string;
+    }
+  | {
+      type: 'currentBranch';
+      requestId: number;
+      status: 'loaded' | 'error';
+      branch?: string;
     }
   | {
       type: 'settings';

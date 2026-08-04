@@ -2,15 +2,6 @@ export type Locale = 'en' | 'ko-KR';
 export type LanguagePreference = 'auto' | Locale;
 
 const messages = {
-  'app.eyebrow': ['Local AI code review', '로컬 AI 코드 리뷰'],
-  'app.ready': [
-    'Select changes and start a review.',
-    '변경사항을 선택하고 리뷰를 직접 시작하세요.',
-  ],
-  'app.setup': [
-    'Configure your environment before starting a review.',
-    '리뷰를 시작하기 전에 실행 환경을 설정하세요.',
-  ],
   'nav.menu': ['Codivew menu', 'Codivew 메뉴'],
   'nav.review': ['Review', '리뷰'],
   'nav.results': ['Results', '결과'],
@@ -19,6 +10,10 @@ const messages = {
   'review.noWorkspace': ['No workspace', '워크스페이스 없음'],
   'review.noModel': ['No model configured', '모델 미설정'],
   'review.change': ['Change', '변경'],
+  'review.currentBranch': ['Current branch', '현재 브랜치'],
+  'review.currentBranchLoading': ['Loading...', '확인 중...'],
+  'review.currentBranchUnavailable': ['Unavailable', '확인할 수 없음'],
+  'review.detachedHead': ['Detached HEAD', '분리된 HEAD'],
   'review.scope': ['Review scope', '리뷰 범위'],
   'review.baseBranch': ['Base branch', '기준 브랜치'],
   'review.start': ['Start review', '리뷰 시작'],

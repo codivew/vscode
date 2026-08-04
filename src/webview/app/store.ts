@@ -42,6 +42,8 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         diffStatsStatus: 'idle' as const,
         diffStatsMessage: t('review.scopeCalculating'),
         diffStatsRequestId: 0,
+        currentBranchStatus: 'idle' as const,
+        currentBranchRequestId: 0,
       },
       settings: {
         maxDiffChars,

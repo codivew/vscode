@@ -32,6 +32,9 @@ export type ReviewState = {
   diffStatsStatus: DiffStatsStatus;
   diffStatsMessage: string;
   diffStatsRequestId: number;
+  currentBranch?: string;
+  currentBranchStatus: 'idle' | 'loading' | 'loaded' | 'error';
+  currentBranchRequestId: number;
 };
 
 const initialState: ReviewState = {
@@ -46,6 +49,8 @@ const initialState: ReviewState = {
   diffStatsStatus: 'idle',
   diffStatsMessage: t('review.scopeCalculating'),
   diffStatsRequestId: 0,
+  currentBranchStatus: 'idle',
+  currentBranchRequestId: 0,
 };
 
 export const reviewSlice = createSlice({
@@ -60,6 +65,23 @@ export const reviewSlice = createSlice({
     },
     baseBranchChanged(state, action: PayloadAction<string>) {
       state.baseBranch = action.payload;
+    },
+    currentBranchRequested(state, action: PayloadAction<{ requestId: number }>) {
+      state.currentBranch = undefined;
+      state.currentBranchStatus = 'loading';
+      state.currentBranchRequestId = action.payload.requestId;
+    },
+    currentBranchReceived(
+      state,
+      action: PayloadAction<{
+        requestId: number;
+        status: 'loaded' | 'error';
+        branch?: string;
+      }>,
+    ) {
+      if (action.payload.requestId !== state.currentBranchRequestId) return;
+      state.currentBranch = action.payload.branch;
+      state.currentBranchStatus = action.payload.status;
     },
     diffStatsInvalidated(
       state,
@@ -129,6 +151,8 @@ export const {
   workspaceChanged,
   modeChanged,
   baseBranchChanged,
+  currentBranchRequested,
+  currentBranchReceived,
   diffStatsInvalidated,
   diffStatsRequested,
   diffStatsReceived,

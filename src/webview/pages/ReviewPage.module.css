@@ -39,6 +39,10 @@
   white-space: nowrap;
 }
 
+.reviewEnvironment .currentBranch {
+  color: var(--vscode-foreground);
+}
+
 .textButton {
   flex: 0 0 auto;
   min-height: 26px;

@@ -6,15 +6,18 @@ import { vscode } from '../app/vscode-api.js';
 import Field from '../shared/components/Field.js';
 import {
   baseBranchChanged,
+  currentBranchRequested,
   diffStatsInvalidated,
   diffStatsRequested,
   modeChanged,
 } from '../features/review/reviewSlice.js';
+import type { ReviewState } from '../features/review/reviewSlice.js';
 import ReviewTargets from '../features/review/components/ReviewTargets.js';
 import styles from './ReviewPage.module.css';
 import { t } from '../../shared/localization.js';
 
 let nextStatsRequestId = 0;
+let nextBranchRequestId = 0;
 
 const ReviewPage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
@@ -27,6 +30,22 @@ const ReviewPage = (): React.JSX.Element => {
   const hasModel = ollama.model.trim().length > 0;
   const workspace = review.workspaces.find((item) => item.index === review.workspaceIndex);
   const diffTooLarge = review.diffStats.filteredCharCount > review.diffStats.maxDiffChars;
+
+  useEffect(() => {
+    const loadCurrentBranch = (): void => {
+      const requestId = ++nextBranchRequestId;
+      dispatch(currentBranchRequested({ requestId }));
+      vscode.postMessage({
+        type: 'loadCurrentBranch',
+        workspaceIndex: review.workspaceIndex,
+        requestId,
+      });
+    };
+
+    loadCurrentBranch();
+    window.addEventListener('focus', loadCurrentBranch);
+    return (): void => window.removeEventListener('focus', loadCurrentBranch);
+  }, [dispatch, review.workspaceIndex]);
 
   useEffect(() => {
     const requestId = ++nextStatsRequestId;
@@ -85,6 +104,9 @@ const ReviewPage = (): React.JSX.Element => {
         <div>
           <span>{t('review.environment')}</span>
           <strong>{workspace?.name ?? t('review.noWorkspace')}</strong>
+          <small className={styles.currentBranch}>
+            {t('review.currentBranch')}: {currentBranchLabel(review)}
+          </small>
           <small>{ollama.model || t('review.noModel')}</small>
         </div>
         <button
@@ -170,6 +192,14 @@ const ReviewPage = (): React.JSX.Element => {
     </form>
   );
 };
+
+function currentBranchLabel(review: ReviewState): string {
+  if (review.currentBranchStatus === 'idle' || review.currentBranchStatus === 'loading') {
+    return t('review.currentBranchLoading');
+  }
+  if (review.currentBranchStatus === 'error') return t('review.currentBranchUnavailable');
+  return review.currentBranch ?? t('review.detachedHead');
+}
 
 const Metric = ({ value, label }: { value: string | number; label: string }): React.JSX.Element => {
   return (

@@ -35,28 +35,5 @@ button:disabled {
 }
 
 main.app {
-  padding: 18px 14px 28px;
-}
-
-.appHero {
-  margin-bottom: 18px;
-}
-
-.appHero h1 {
-  margin: 5px 0 4px;
-  font-size: 22px;
-  line-height: 1.2;
-}
-
-.appEyebrow {
-  color: var(--vscode-descriptionForeground);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.appLead {
-  margin: 0;
-  color: var(--vscode-descriptionForeground);
+  padding: 12px 14px 28px;
 }
