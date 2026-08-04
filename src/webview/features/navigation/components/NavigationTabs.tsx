@@ -5,9 +5,12 @@ import { useAppSelector } from '../../../app/hooks.js';
 import styles from './NavigationTabs.module.css';
 import { t } from '../../../../shared/localization.js';
 
-const NavigationTabs = (): React.JSX.Element => {
+const NavigationTabs = (): React.JSX.Element | null => {
   const { pathname } = useLocation();
+  const setupComplete = useAppSelector((state) => state.settings.setupComplete);
   const hasResult = useAppSelector((state) => state.review.result !== undefined);
+  if (!setupComplete) return null;
+
   const tabs = [
     { path: '/review', label: t('nav.review') },
     ...(hasResult ? [{ path: '/results', label: t('nav.results') }] : []),
