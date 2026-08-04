@@ -8,6 +8,13 @@ All notable changes to Codivew for VS Code are documented in this file.
 
 - Automatic language detection now follows the Korean display locale in Cursor as well as VS Code.
 
+### Changed
+
+- Webview navigation now uses React Router for the Review, Results, and Settings pages while
+  preserving setup guards, automatic Results navigation, and restored tab state.
+- Route-level views are now organized as pages, with reusable state and components remaining in
+  their feature modules.
+
 ## 0.2.0 - 2026-08-04
 
 ### Added
