@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useMemo, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { t } from '../../shared/localization.js';
 import { useAppSelector } from '../app/hooks.js';
 import { vscode } from '../app/vscode-api.js';
@@ -24,7 +25,7 @@ const ResultsPage = (): React.JSX.Element => {
     return [...byFile.entries()];
   }, [filter, result]);
 
-  if (result === undefined) return <div className={styles.empty}>{t('results.noIssues')}</div>;
+  if (result === undefined) return <Navigate to="/review" replace />;
 
   return (
     <section className={styles.results} aria-labelledby="results-title">

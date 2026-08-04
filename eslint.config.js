@@ -1,13 +1,14 @@
 import eslint from '@eslint/js';
+import globals from 'globals';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   { ignores: ['dist/**', 'coverage/**'] },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  prettierRecommended,
   {
+    files: ['**/*.{ts,tsx}'],
+    extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -21,7 +22,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.mjs'],
-    extends: [tseslint.configs.disableTypeChecked],
+    files: ['**/*.js', '**/*.cjs'],
+    languageOptions: {
+      globals: globals.node,
+    },
   },
+  prettierRecommended,
 );

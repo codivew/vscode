@@ -1,6 +1,6 @@
-import { numberValue, stringValue, validHttpUrl } from './message-values.js';
-import { t } from '../shared/localization.js';
-import type { LoadModelsMessage, WebviewMessage } from '../shared/protocol.js';
+import { numberValue, stringValue, validHttpUrl } from '../message-values.js';
+import { t } from '../../../shared/localization.js';
+import type { LoadModelsMessage, WebviewMessage } from '../../../shared/protocol.js';
 
 type ModelsResponse = Extract<WebviewMessage, { type: 'models' }>;
 
@@ -8,7 +8,9 @@ type OllamaTagsResponse = {
   models?: unknown;
 };
 
-export async function loadModels(message: LoadModelsMessage): Promise<ModelsResponse | undefined> {
+export async function getOllamaModels(
+  message: LoadModelsMessage,
+): Promise<ModelsResponse | undefined> {
   const requestId = numberValue(message.requestId);
   if (requestId === undefined) return undefined;
 

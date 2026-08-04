@@ -1,5 +1,4 @@
-import { execFile, execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { execFile } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
@@ -12,11 +11,8 @@ const extensionRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const execFileAsync = promisify(execFile);
 const fixtureRepository = await createFixtureRepository();
 const ollama = await startMockOllama();
-const cursorExecutablePath = process.argv.includes('--cursor') ? findCursorExecutable() : undefined;
-
 try {
   await runTests({
-    ...(cursorExecutablePath === undefined ? {} : { vscodeExecutablePath: cursorExecutablePath }),
     extensionDevelopmentPath: extensionRoot,
     extensionTestsPath: resolve(extensionRoot, 'test/suite/index.cjs'),
     extensionTestsEnv: { CODIVEW_TEST_OLLAMA_URL: ollama.url },
@@ -29,24 +25,6 @@ try {
 } finally {
   await ollama.close();
   await rm(fixtureRepository, { recursive: true, force: true });
-}
-
-function findCursorExecutable() {
-  const configured = process.env.CURSOR_EXECUTABLE_PATH;
-  if (configured !== undefined && existsSync(configured)) return configured;
-
-  if (process.platform === 'darwin') {
-    const application = '/Applications/Cursor.app/Contents/MacOS/Cursor';
-    if (existsSync(application)) return application;
-  }
-
-  try {
-    const cli = execFileSync('which', ['cursor'], { encoding: 'utf8' }).trim();
-    if (cli.length > 0) return cli;
-  } catch {
-    // Fall through to the actionable error below.
-  }
-  throw new Error('Cursor executable not found. Set CURSOR_EXECUTABLE_PATH and try again.');
 }
 
 async function createFixtureRepository() {

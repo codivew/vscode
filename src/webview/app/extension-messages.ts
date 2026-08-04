@@ -1,5 +1,10 @@
 import { modelsReceived } from '../features/ollama/ollamaSlice.js';
-import { diffStatsReceived, reviewStateReceived } from '../features/review/reviewSlice.js';
+import {
+  branchesReceived,
+  currentBranchReceived,
+  diffStatsReceived,
+  reviewStateReceived,
+} from '../features/review/reviewSlice.js';
 import { settingsReceived } from '../features/settings/settingsSlice.js';
 import type { WebviewMessage } from '../../shared/protocol.js';
 import type { AppStore } from './store.js';
@@ -16,6 +21,14 @@ export function connectExtensionMessages(
     }
     if (data.type === 'diffStats') {
       store.dispatch(diffStatsReceived(data));
+      return;
+    }
+    if (data.type === 'currentBranch') {
+      store.dispatch(currentBranchReceived(data));
+      return;
+    }
+    if (data.type === 'branches') {
+      store.dispatch(branchesReceived(data));
       return;
     }
     if (data.type === 'settings') {

@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import * as vscode from 'vscode';
-import type { WebviewInitialState } from '../shared/protocol.js';
+import type { WebviewInitialState } from '../../shared/protocol.js';
 
 export function createWebviewDocument(
   webview: vscode.Webview,

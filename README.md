@@ -48,9 +48,10 @@ Language, workspace, Ollama connection, model, and maximum Diff size can be chan
 ```bash
 npm install
 npm run check
+npm run dev
 npm run package
 ```
 
-Use `npm run test:extension` for VS Code or `npm run test:cursor` for an installed Cursor app.
+Use `npm run dev` to open a persistent VS Code Extension Host and `npm run test:extension` to run the integration test.
 
 Codivew imports its review engine from the public `codivew/core` API.

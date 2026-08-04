@@ -10,7 +10,8 @@
   background: var(--vscode-editor-background);
 }
 
-.tabs a {
+.tabs a,
+.tabs span {
   display: grid;
   place-items: center;
   min-height: 29px;
@@ -31,4 +32,9 @@
 .tabs a.active {
   color: var(--vscode-button-foreground);
   background: var(--vscode-button-background);
+}
+
+.tabs .disabled {
+  cursor: default;
+  opacity: 0.45;
 }

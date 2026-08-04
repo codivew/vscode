@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { ReviewMode, type ReviewProgressStage, type RunReviewResult } from 'codivew/core';
-import { ReviewController, progressMessage } from './controller.js';
-import { DiffStatsLoader } from './diff-stats-loader.js';
-import { getLocale, t } from '../shared/localization.js';
+import { getLocale, t } from '../../shared/localization.js';
+import type { ExtensionMessage, ReviewMessage, WebviewMessage } from '../../shared/protocol.js';
+import { progressMessage, ReviewController } from '../review/review-controller.js';
 import {
   numberValue,
   positiveIntegerValue,
@@ -11,36 +11,25 @@ import {
   stringValue,
   validHttpUrl,
 } from './message-values.js';
-import { loadModels } from './model-loader.js';
-import { getInitialState, saveSettings } from './settings.js';
-import type { ExtensionMessage, ReviewMessage, WebviewMessage } from '../shared/protocol.js';
-import { createWebviewDocument } from './webview-document.js';
+import { getCurrentBranch } from './queries/current-branch.js';
+import { getBranches } from './queries/branches.js';
+import { DiffStatsQuery } from './queries/diff-stats.js';
+import { getOllamaModels } from './queries/ollama-models.js';
+import { saveSettings } from './queries/settings.js';
 
-export class ReviewViewProvider implements vscode.WebviewViewProvider {
-  static readonly viewType = 'codivew.reviewView';
-  private view: vscode.WebviewView | undefined;
-  private readonly diffStats = new DiffStatsLoader();
+export class ReviewMessageHandler {
+  private readonly diffStats = new DiffStatsQuery();
 
   constructor(
     private readonly controller: ReviewController,
-    private readonly extensionUri: vscode.Uri,
+    private readonly post: (message: WebviewMessage) => void,
   ) {}
 
-  resolveWebviewView(view: vscode.WebviewView): void {
-    this.view = view;
-    const distUri = vscode.Uri.joinPath(this.extensionUri, 'dist');
-    view.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [distUri],
-    };
-    view.webview.html = createWebviewDocument(view.webview, this.extensionUri, getInitialState());
-    view.webview.onDidReceiveMessage((message: ExtensionMessage) => {
-      void this.handleMessage(message);
-    });
-    view.onDidDispose(() => this.diffStats.dispose());
+  dispose(): void {
+    this.diffStats.dispose();
   }
 
-  private async handleMessage(message: ExtensionMessage): Promise<void> {
+  async handle(message: ExtensionMessage): Promise<void> {
     switch (message.type) {
       case 'cancel':
         this.controller.cancel();
@@ -55,12 +44,22 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
         await this.openFile(message.workspaceIndex, message.path);
         return;
       case 'loadModels': {
-        const response = await loadModels(message);
+        const response = await getOllamaModels(message);
         if (response !== undefined) this.post(response);
         return;
       }
       case 'loadDiffStats': {
         const response = await this.diffStats.load(message);
+        if (response !== undefined) this.post(response);
+        return;
+      }
+      case 'loadCurrentBranch': {
+        const response = await getCurrentBranch(message);
+        if (response !== undefined) this.post(response);
+        return;
+      }
+      case 'loadBranches': {
+        const response = await getBranches(message);
         if (response !== undefined) this.post(response);
         return;
       }
@@ -183,10 +182,6 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider {
 
   private postState(status: 'running' | 'cancelled' | 'error', message: string): void {
     this.post({ type: 'state', status, message });
-  }
-
-  private post(message: WebviewMessage): void {
-    void this.view?.webview.postMessage(message);
   }
 }
 

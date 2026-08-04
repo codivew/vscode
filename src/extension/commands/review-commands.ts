@@ -1,0 +1,102 @@
+import * as vscode from 'vscode';
+import { ReviewMode } from 'codivew/core';
+import { getLocale, t } from '../../shared/localization.js';
+import { listBaseBranches, type RepositoryBranches } from '../repository/branches.js';
+import type { ReviewController } from '../review/review-controller.js';
+
+export function registerReviewCommands(controller: ReviewController): vscode.Disposable[] {
+  return [
+    registerReviewCommand('codivew.reviewWorking', ReviewMode.WORKING, controller),
+    registerReviewCommand('codivew.reviewStaged', ReviewMode.STAGED, controller),
+    registerReviewCommand('codivew.reviewBranch', ReviewMode.BRANCH, controller),
+    vscode.commands.registerCommand('codivew.openLatestReport', () =>
+      controller.openLatestReport(),
+    ),
+    vscode.commands.registerCommand('codivew.openIssue', (issueIndex: number) =>
+      controller.openLatestIssue(issueIndex),
+    ),
+  ];
+}
+
+function registerReviewCommand(
+  command: string,
+  mode: ReviewMode,
+  controller: ReviewController,
+): vscode.Disposable {
+  return vscode.commands.registerCommand(command, async () => {
+    const folder = await selectWorkspaceFolder();
+    if (folder === undefined) return;
+
+    const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
+    const configuredBaseBranch = configuration.get('baseBranch', 'main');
+    const baseBranch =
+      mode === ReviewMode.BRANCH
+        ? await selectBaseBranch(folder, configuredBaseBranch)
+        : configuredBaseBranch;
+    if (baseBranch === undefined) return;
+
+    await controller.run({
+      folder,
+      locale: getLocale(),
+      mode,
+      baseBranch: baseBranch.trim(),
+      projectContext: configuration.get<string[]>('projectContext', []),
+      ollamaUrl: configuration.get<string>('ollamaUrl'),
+      model: configuration.get<string>('model'),
+      maxDiffChars: configuration.get<number>('maxDiffChars'),
+      openReport: true,
+    });
+  });
+}
+
+async function selectBaseBranch(
+  folder: vscode.WorkspaceFolder,
+  configuredBranch: string,
+): Promise<string | undefined> {
+  try {
+    const repository = await listBaseBranches(folder.uri.fsPath);
+    if (repository.branches.length === 0) {
+      await vscode.window.showWarningMessage(t('review.branchesUnavailable'));
+      return undefined;
+    }
+    const preferred = preferredBaseBranch(configuredBranch, repository);
+    const branches = [preferred, ...repository.branches.filter((branch) => branch !== preferred)];
+    return vscode.window.showQuickPick(branches, {
+      title: t('host.branchReview'),
+      placeHolder: t('host.branchPrompt'),
+    });
+  } catch {
+    await vscode.window.showWarningMessage(t('review.branchesUnavailable'));
+    return undefined;
+  }
+}
+
+function preferredBaseBranch(configuredBranch: string, repository: RepositoryBranches): string {
+  const preferred = [
+    configuredBranch,
+    repository.defaultBranch,
+    'main',
+    'master',
+    'origin/main',
+    'origin/master',
+  ];
+  return (
+    preferred.find((branch) => branch !== undefined && repository.branches.includes(branch)) ??
+    repository.branches[0]
+  );
+}
+
+async function selectWorkspaceFolder(): Promise<vscode.WorkspaceFolder | undefined> {
+  const folders = vscode.workspace.workspaceFolders;
+  if (folders === undefined || folders.length === 0) {
+    await vscode.window.showWarningMessage(t('host.openWorkspace'));
+    return undefined;
+  }
+  if (folders.length === 1) return folders[0];
+
+  const selected = await vscode.window.showQuickPick(
+    folders.map((folder) => ({ label: folder.name, description: folder.uri.fsPath, folder })),
+    { title: t('host.selectWorkspace') },
+  );
+  return selected?.folder;
+}
