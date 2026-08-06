@@ -18,6 +18,9 @@ const messages = {
   'review.branchesLoading': ['Loading branches...', '브랜치 조회 중...'],
   'review.branchesUnavailable': ['No base branch available', '선택 가능한 기준 브랜치 없음'],
   'review.scope': ['Review scope', '리뷰 범위'],
+  'review.modeWorking': ['Working tree', '작업 트리'],
+  'review.modeStaged': ['Staged changes', '스테이징된 변경사항'],
+  'review.modeBranch': ['Branch changes', '브랜치 변경사항'],
   'review.baseBranch': ['Base branch', '기준 브랜치'],
   'review.start': ['Start review', '리뷰 시작'],
   'review.cancel': ['Cancel', '취소'],
@@ -235,7 +238,7 @@ const messages = {
   'host.selectScope': ['Select a review scope.', '리뷰 범위를 선택하세요.'],
   'host.branchModeRequired': [
     'Branch reviews require a base branch.',
-    'branch 리뷰에는 기준 브랜치가 필요합니다.',
+    '브랜치 리뷰에는 기준 브랜치가 필요합니다.',
   ],
   'host.preparing': ['Preparing the review...', '리뷰를 준비하는 중...'],
   'host.preparingEditedReview': [
@@ -255,8 +258,8 @@ const messages = {
   'host.comment': ['Needs review', '확인 필요'],
   'host.requestChanges': ['Changes requested', '수정 필요'],
   'host.branchChanges': ['Changes from {branch}', '{branch} 기준 변경량'],
-  'host.stagedChanges': ['Staged changes', 'Staged changes 변경량'],
-  'host.workingChanges': ['Working tree changes', 'Working tree 변경량'],
+  'host.stagedChanges': ['Staged changes', '스테이징된 변경량'],
+  'host.workingChanges': ['Working tree changes', '작업 트리 변경량'],
 } as const;
 
 export type MessageKey = keyof typeof messages;
