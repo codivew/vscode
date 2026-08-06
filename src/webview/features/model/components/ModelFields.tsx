@@ -4,13 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
 import { vscode } from '../../../app/vscode-api.js';
 import Field from '../../../shared/components/Field.js';
 import { validHttpUrl } from '../../../shared/url.js';
-import {
-  apiKeyChanged,
-  modelChanged,
-  modelsInvalidated,
-  modelsRequested,
-  urlChanged,
-} from '../modelSlice.js';
+import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../modelSlice.js';
 import styles from './ModelFields.module.css';
 import { t } from '../../../../shared/localization.js';
 
@@ -25,6 +19,7 @@ const ModelFields = ({
 }): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const model = useAppSelector((state) => state.model);
+  const settings = useAppSelector((state) => state.settings);
   const hasModels = model.status === 'loaded' && model.models.length > 0;
 
   useEffect(() => {
@@ -45,12 +40,22 @@ const ModelFields = ({
       vscode.postMessage({
         type: 'loadModels',
         apiUrl: validUrl,
-        apiKey: model.apiKey,
+        authenticationType: settings.authenticationType,
+        apiKey: settings.apiKey,
+        username: settings.username,
+        password: settings.password,
         requestId,
       });
     }, 400);
     return (): void => window.clearTimeout(timeout);
-  }, [dispatch, model.url, model.apiKey]);
+  }, [
+    dispatch,
+    model.url,
+    settings.apiKey,
+    settings.authenticationType,
+    settings.password,
+    settings.username,
+  ]);
 
   return (
     <>
@@ -65,19 +70,6 @@ const ModelFields = ({
           required
         />
         <div className={styles.hint}>{t('model.urlHint')}</div>
-      </Field>
-
-      <Field label={t('model.apiKey')} htmlFor="model-api-key" className={fieldClassName}>
-        <input
-          id="model-api-key"
-          type="password"
-          value={model.apiKey}
-          placeholder={t('model.apiKeyPlaceholder')}
-          disabled={disabled}
-          autoComplete="off"
-          onChange={(event) => dispatch(apiKeyChanged(event.target.value))}
-        />
-        <div className={styles.hint}>{t('model.apiKeyHint')}</div>
       </Field>
 
       <Field label={t('model.label')} htmlFor="model" className={fieldClassName}>

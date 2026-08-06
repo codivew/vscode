@@ -24,7 +24,6 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
     preloadedState: {
       model: {
         url: initial.apiUrl,
-        apiKey: initial.apiKey,
         model: initial.model,
         models: [],
         status: 'idle' as const,
@@ -62,6 +61,11 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         isSetupComplete: initial.setupComplete,
         status: 'idle' as const,
         message: t('settings.diffDescription'),
+        authenticationType: initial.authenticationType,
+        apiKey: '',
+        username: initial.authenticationUsername,
+        password: '',
+        authenticationConfigured: initial.authenticationConfigured,
       },
     },
   });

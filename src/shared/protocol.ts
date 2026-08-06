@@ -4,16 +4,20 @@ export type ReviewMessage = {
   mode: unknown;
   baseBranch: unknown;
   apiUrl: unknown;
-  apiKey: unknown;
   model: unknown;
   maxDiffChars: unknown;
   selectedFiles: unknown;
 };
 
+export type AuthenticationType = 'none' | 'api-key' | 'basic';
+
 export type LoadModelsMessage = {
   type: 'loadModels';
   apiUrl: unknown;
+  authenticationType: unknown;
   apiKey: unknown;
+  username: unknown;
+  password: unknown;
   requestId: unknown;
 };
 
@@ -42,7 +46,10 @@ export type SaveSettingsMessage = {
   type: 'saveSettings';
   workspaceIndex: unknown;
   apiUrl: unknown;
+  authenticationType: unknown;
   apiKey: unknown;
+  username: unknown;
+  password: unknown;
   model: unknown;
   maxDiffChars: unknown;
   language: unknown;
@@ -165,7 +172,9 @@ export type WebviewInitialState = {
   language: LanguagePreference;
   workspaces: Array<{ index: number; name: string; path: string }>;
   apiUrl: string;
-  apiKey: string;
+  authenticationType: AuthenticationType;
+  authenticationUsername: string;
+  authenticationConfigured: boolean;
   model: string;
   baseBranch: string;
   maxDiffChars: number;

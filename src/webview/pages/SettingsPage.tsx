@@ -8,9 +8,13 @@ import { validHttpUrl } from '../shared/url.js';
 import ModelFields from '../features/model/components/ModelFields.js';
 import { workspaceChanged } from '../features/review/reviewSlice.js';
 import {
+  apiKeyChanged,
+  authenticationTypeChanged,
   draftLanguageChanged,
   draftMaxDiffCharsChanged,
+  passwordChanged,
   settingsSaveRequested,
+  usernameChanged,
 } from '../features/settings/settingsSlice.js';
 import styles from './SettingsPage.module.css';
 import { t } from '../../shared/localization.js';
@@ -24,11 +28,18 @@ const SettingsPage = (): React.JSX.Element => {
   const model = useAppSelector((state) => state.model);
   const hasWorkspace = review.workspaces.length > 0 && review.workspaceIndex >= 0;
   const hasModels = model.status === 'loaded' && model.models.length > 0;
+  const validAuthentication =
+    settings.authenticationType === 'none' ||
+    settings.authenticationConfigured ||
+    (settings.authenticationType === 'api-key'
+      ? settings.apiKey.trim().length > 0
+      : settings.username.trim().length > 0 && settings.password.trim().length > 0);
   const validConfiguration =
     hasWorkspace &&
     validHttpUrl(model.url) !== undefined &&
     model.model.trim().length > 0 &&
-    (settings.isSetupComplete || hasModels);
+    (settings.isSetupComplete || hasModels) &&
+    validAuthentication;
 
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -37,7 +48,10 @@ const SettingsPage = (): React.JSX.Element => {
       type: 'saveSettings',
       workspaceIndex: review.workspaceIndex,
       apiUrl: model.url,
-      apiKey: model.apiKey,
+      authenticationType: settings.authenticationType,
+      apiKey: settings.apiKey,
+      username: settings.username,
+      password: settings.password,
       model: model.model,
       maxDiffChars: settings.draftMaxDiffChars,
       language: settings.draftLanguage,
@@ -88,6 +102,68 @@ const SettingsPage = (): React.JSX.Element => {
         </select>
         <div className={styles.hint}>{t('settings.languageHint')}</div>
       </Field>
+
+      <Field
+        label={t('settings.authentication')}
+        htmlFor="authentication-type"
+        className={styles.field}
+      >
+        <select
+          id="authentication-type"
+          disabled={settings.status === 'saving'}
+          value={settings.authenticationType}
+          onChange={(event) =>
+            dispatch(authenticationTypeChanged(event.target.value as 'none' | 'api-key' | 'basic'))
+          }
+        >
+          <option value="none">{t('settings.authenticationNone')}</option>
+          <option value="api-key">{t('settings.authenticationApiKey')}</option>
+          <option value="basic">{t('settings.authenticationBasic')}</option>
+        </select>
+        <div className={styles.hint}>{t('settings.authenticationHint')}</div>
+      </Field>
+
+      {settings.authenticationType === 'api-key' && (
+        <Field label={t('settings.apiKey')} htmlFor="api-key" className={styles.field}>
+          <input
+            id="api-key"
+            type="password"
+            autoComplete="off"
+            disabled={settings.status === 'saving'}
+            value={settings.apiKey}
+            placeholder={settings.authenticationConfigured ? t('settings.secretStored') : undefined}
+            onChange={(event) => dispatch(apiKeyChanged(event.target.value))}
+          />
+        </Field>
+      )}
+
+      {settings.authenticationType === 'basic' && (
+        <>
+          <Field label={t('settings.username')} htmlFor="username" className={styles.field}>
+            <input
+              id="username"
+              type="text"
+              autoComplete="username"
+              disabled={settings.status === 'saving'}
+              value={settings.username}
+              onChange={(event) => dispatch(usernameChanged(event.target.value))}
+            />
+          </Field>
+          <Field label={t('settings.password')} htmlFor="password" className={styles.field}>
+            <input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              disabled={settings.status === 'saving'}
+              value={settings.password}
+              placeholder={
+                settings.authenticationConfigured ? t('settings.secretStored') : undefined
+              }
+              onChange={(event) => dispatch(passwordChanged(event.target.value))}
+            />
+          </Field>
+        </>
+      )}
 
       <ModelFields disabled={settings.status === 'saving'} fieldClassName={styles.field} />
 

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DEFAULT_API_URL, type Authentication } from 'codivew/core';
+import { DEFAULT_API_URL } from 'codivew/core';
 
 export function resolveApiUrl(configuration: vscode.WorkspaceConfiguration): string {
   const explicitApiUrl = explicitValue(configuration, 'apiUrl');
@@ -16,13 +16,6 @@ export function hasExplicitApiUrl(configuration: vscode.WorkspaceConfiguration):
     explicitValue(configuration, 'apiUrl') !== undefined ||
     explicitValue(configuration, 'ollamaUrl') !== undefined
   );
-}
-
-export function resolveAuthentication(
-  configuration: vscode.WorkspaceConfiguration,
-): Authentication {
-  const apiKey = configuration.get<string>('apiKey', '').trim();
-  return apiKey.length > 0 ? { type: 'api-key', apiKey } : { type: 'none' };
 }
 
 function normalizeLegacyApiUrl(url: string): string {

@@ -5,7 +5,6 @@ export type ModelsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
 export type ModelState = {
   url: string;
-  apiKey: string;
   model: string;
   models: string[];
   status: ModelsStatus;
@@ -15,7 +14,6 @@ export type ModelState = {
 
 const initialState: ModelState = {
   url: 'http://localhost:11434/v1',
-  apiKey: '',
   model: '',
   models: [],
   status: 'idle',
@@ -29,9 +27,6 @@ export const modelSlice = createSlice({
   reducers: {
     urlChanged(state, action: PayloadAction<string>) {
       state.url = action.payload;
-    },
-    apiKeyChanged(state, action: PayloadAction<string>) {
-      state.apiKey = action.payload;
     },
     modelChanged(state, action: PayloadAction<string>) {
       state.model = action.payload;
@@ -68,11 +63,5 @@ export const modelSlice = createSlice({
   },
 });
 
-export const {
-  urlChanged,
-  apiKeyChanged,
-  modelChanged,
-  modelsInvalidated,
-  modelsRequested,
-  modelsReceived,
-} = modelSlice.actions;
+export const { urlChanged, modelChanged, modelsInvalidated, modelsRequested, modelsReceived } =
+  modelSlice.actions;

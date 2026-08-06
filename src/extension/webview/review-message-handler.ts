@@ -1,12 +1,8 @@
 import * as vscode from 'vscode';
-import {
-  ReviewMode,
-  type Authentication,
-  type ReviewProgressStage,
-  type RunReviewResult,
-} from 'codivew/core';
+import { ReviewMode, type ReviewProgressStage, type RunReviewResult } from 'codivew/core';
 import { getLocale, t } from '../../shared/localization.js';
 import type { ExtensionMessage, ReviewMessage, WebviewMessage } from '../../shared/protocol.js';
+import { getStoredAuthentication } from '../authentication.js';
 import { progressMessage, ReviewController } from '../review/review-controller.js';
 import {
   numberValue,
@@ -27,6 +23,7 @@ export class ReviewMessageHandler {
 
   constructor(
     private readonly controller: ReviewController,
+    private readonly secrets: vscode.SecretStorage,
     private readonly post: (message: WebviewMessage) => void,
   ) {}
 
@@ -60,7 +57,7 @@ export class ReviewMessageHandler {
         await this.openFile(message.workspaceIndex, message.path);
         return;
       case 'loadModels': {
-        const response = await getModels(message);
+        const response = await getModels(message, this.secrets);
         if (response !== undefined) this.post(response);
         return;
       }
@@ -80,7 +77,7 @@ export class ReviewMessageHandler {
         return;
       }
       case 'saveSettings':
-        this.post(await saveSettings(message));
+        this.post(await saveSettings(message, this.secrets));
         return;
       case 'review':
         await this.startReview(message);
@@ -129,9 +126,6 @@ export class ReviewMessageHandler {
     const baseBranchValue = stringValue(message.baseBranch);
     const baseBranch = baseBranchValue ?? 'main';
     const apiUrl = validHttpUrl(message.apiUrl);
-    const apiKey = stringValue(message.apiKey);
-    const authentication: Authentication =
-      apiKey === undefined ? { type: 'none' } : { type: 'api-key', apiKey };
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
     const selectedFiles = stringArrayValue(message.selectedFiles);
@@ -171,12 +165,12 @@ export class ReviewMessageHandler {
         mode,
         baseBranch,
         apiUrl,
-        authentication,
         model,
         maxDiffChars,
         selectedFiles,
         projectContext: configuration.get<string[]>('projectContext', []),
         openReport: false,
+        authentication: await getStoredAuthentication(this.secrets),
       },
       {
         onProgress: (stage) => this.postProgress(stage),

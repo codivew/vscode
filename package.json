@@ -100,11 +100,6 @@
           "default": "http://localhost:11434/v1",
           "description": "%config.apiUrl%"
         },
-        "codivew.apiKey": {
-          "type": "string",
-          "default": "",
-          "description": "%config.apiKey%"
-        },
         "codivew.model": {
           "type": "string",
           "default": "qwen3.6:35b-a3b-coding-mxfp8",

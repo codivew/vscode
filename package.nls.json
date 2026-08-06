@@ -1,5 +1,5 @@
 {
-  "codivew.description": "Review Git changes with Codivew and a local AI model.",
+  "codivew.description": "Review Git changes with Codivew and an OpenAI-compatible API.",
   "command.reviewWorking": "Codivew: Review Working Tree",
   "command.reviewStaged": "Codivew: Review Staged Changes",
   "command.reviewBranch": "Codivew: Review Branch Changes",
@@ -10,9 +10,8 @@
   "config.language.auto": "Follow the VS Code display language.",
   "config.language.en": "Always use English.",
   "config.language.ko": "Always use Korean.",
-  "config.apiUrl": "OpenAI-compatible API URL used for code reviews (e.g. a local Ollama server).",
-  "config.apiKey": "Optional API key sent as a Bearer token, for servers that require authentication.",
-  "config.model": "AI model used for code reviews.",
+  "config.apiUrl": "OpenAI-compatible API URL used for code reviews.",
+  "config.model": "Model used for code reviews.",
   "config.baseBranch": "Default base branch for branch reviews.",
   "config.projectContext": "Project context included in every review prompt.",
   "config.maxDiffChars": "Maximum filtered Diff size in characters for one review."

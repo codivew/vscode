@@ -121,7 +121,6 @@ const ReviewPage = (): React.JSX.Element => {
       type: 'review',
       workspaceIndex: review.workspaceIndex,
       apiUrl: model.url,
-      apiKey: model.apiKey,
       model: model.model,
       mode: review.mode,
       baseBranch: review.baseBranch,
@@ -181,9 +180,9 @@ const ReviewPage = (): React.JSX.Element => {
           disabled={running}
           onChange={(event) => dispatch(modeChanged(event.target.value))}
         >
-          <option value="working">Working tree</option>
-          <option value="staged">Staged changes</option>
-          <option value="branch">Branch changes</option>
+          <option value="working">{t('review.modeWorking')}</option>
+          <option value="staged">{t('review.modeStaged')}</option>
+          <option value="branch">{t('review.modeBranch')}</option>
         </select>
       </Field>
 

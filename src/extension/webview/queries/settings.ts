@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import { DEFAULT_MAX_DIFF_CHARS, setLanguage } from 'codivew/core';
+import { DEFAULT_MAX_DIFF_CHARS, DEFAULT_MODEL, setLanguage } from 'codivew/core';
+import {
+  getStoredAuthentication,
+  resolveAuthentication,
+  storeAuthentication,
+} from '../../authentication.js';
 import {
   getLocale,
   parseLanguagePreference,
@@ -17,15 +22,18 @@ import type {
 
 type SettingsResponse = Extract<WebviewMessage, { type: 'settings' }>;
 
-export async function saveSettings(message: SaveSettingsMessage): Promise<SettingsResponse> {
+export async function saveSettings(
+  message: SaveSettingsMessage,
+  secrets: vscode.SecretStorage,
+): Promise<SettingsResponse> {
   const folders = vscode.workspace.workspaceFolders ?? [];
   const workspaceIndex = numberValue(message.workspaceIndex);
   const folder = workspaceIndex === undefined ? undefined : folders[workspaceIndex];
   const apiUrl = validHttpUrl(message.apiUrl);
-  const apiKey = stringValue(message.apiKey) ?? '';
   const model = stringValue(message.model);
   const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
   const language = parseLanguagePreference(message.language);
+  const authentication = await resolveAuthentication(message, secrets);
   if (folder === undefined) return error(t('host.defaultWorkspace'));
   if (apiUrl === undefined) return error(t('model.invalidUrl'));
   if (model === undefined) return error(t('host.selectModel'));
@@ -33,13 +41,14 @@ export async function saveSettings(message: SaveSettingsMessage): Promise<Settin
     return error(t('host.maxDiffInvalid'));
   }
   if (language === undefined) return error(t('host.invalidLanguage'));
+  if (authentication === undefined) return error(t('host.invalidAuthentication'));
 
   const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
   await configuration.update('apiUrl', apiUrl, vscode.ConfigurationTarget.Global);
-  await configuration.update('apiKey', apiKey, vscode.ConfigurationTarget.Global);
   await configuration.update('model', model, vscode.ConfigurationTarget.Global);
   await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
   await configuration.update('language', language, vscode.ConfigurationTarget.Global);
+  await storeAuthentication(secrets, authentication);
   const locale = resolveLocale(language, vscode.env.language, process.env.VSCODE_NLS_CONFIG);
   setLocale(locale);
   setLanguage(locale);
@@ -54,13 +63,14 @@ export async function saveSettings(message: SaveSettingsMessage): Promise<Settin
   };
 }
 
-export function getInitialState(): WebviewInitialState {
+export async function getInitialState(secrets: vscode.SecretStorage): Promise<WebviewInitialState> {
   const folders = vscode.workspace.workspaceFolders ?? [];
   const configuration = vscode.workspace.getConfiguration('codivew', folders[0]?.uri);
   const model = configuration.inspect<string>('model');
   const configuredModel = model?.globalValue ?? model?.workspaceValue;
   const language = parseLanguagePreference(configuration.get('language', 'auto')) ?? 'auto';
   const apiUrl = resolveApiUrl(configuration);
+  const authentication = await getStoredAuthentication(secrets);
   return {
     locale: getLocale(),
     language,
@@ -70,8 +80,10 @@ export function getInitialState(): WebviewInitialState {
       path: folder.uri.fsPath,
     })),
     apiUrl,
-    apiKey: configuration.get('apiKey', ''),
-    model: configuration.get('model', 'qwen3.6:35b-a3b-coding-mxfp8'),
+    authenticationType: authentication.type,
+    authenticationUsername: authentication.type === 'basic' ? authentication.username : '',
+    authenticationConfigured: authentication.type !== 'none',
+    model: configuration.get('model', DEFAULT_MODEL),
     baseBranch: configuration.get('baseBranch', 'main'),
     maxDiffChars: configuration.get('maxDiffChars', DEFAULT_MAX_DIFF_CHARS),
     setupComplete: hasExplicitApiUrl(configuration) && stringValue(configuredModel) !== undefined,

@@ -1,15 +1,20 @@
-import { authenticationHeaders, type Authentication } from 'codivew/core';
+import * as vscode from 'vscode';
+import { authenticationHeaders } from 'codivew/core';
+import { resolveAuthentication } from '../../authentication.js';
 import { numberValue, stringValue, validHttpUrl } from '../message-values.js';
 import { t } from '../../../shared/localization.js';
 import type { LoadModelsMessage, WebviewMessage } from '../../../shared/protocol.js';
 
 type ModelsResponse = Extract<WebviewMessage, { type: 'models' }>;
 
-type OpenAIModelsResponse = {
+type ModelsResponseBody = {
   data?: unknown;
 };
 
-export async function getModels(message: LoadModelsMessage): Promise<ModelsResponse | undefined> {
+export async function getModels(
+  message: LoadModelsMessage,
+  secrets: vscode.SecretStorage,
+): Promise<ModelsResponse | undefined> {
   const requestId = numberValue(message.requestId);
   if (requestId === undefined) return undefined;
 
@@ -17,23 +22,23 @@ export async function getModels(message: LoadModelsMessage): Promise<ModelsRespo
   if (apiUrl === undefined) {
     return error(requestId, t('host.invalidApiUrl'));
   }
-
-  const apiKey = stringValue(message.apiKey);
-  const authentication: Authentication =
-    apiKey === undefined ? { type: 'none' } : { type: 'api-key', apiKey };
+  const authentication = await resolveAuthentication(message, secrets);
+  if (authentication === undefined) {
+    return error(requestId, t('host.invalidAuthentication'));
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5_000);
   try {
-    const response = await fetch(`${apiUrl}/models`, {
-      headers: authenticationHeaders(authentication),
+    const response = await fetch(`${apiUrl.replace(/\/+$/, '')}/models`, {
       signal: controller.signal,
+      headers: authenticationHeaders(authentication),
     });
     if (!response.ok) {
       return error(requestId, t('host.modelsHttpError', { status: response.status }));
     }
 
-    const body = (await response.json()) as OpenAIModelsResponse;
+    const body = (await response.json()) as ModelsResponseBody;
     const models = parseModelNames(body.data);
     return {
       type: 'models',
@@ -46,7 +51,7 @@ export async function getModels(message: LoadModelsMessage): Promise<ModelsRespo
           : t('host.modelsLoaded', { count: models.length }),
     };
   } catch {
-    return error(requestId, t('host.serverConnectionError', { url: apiUrl }));
+    return error(requestId, t('host.apiConnectionError', { url: apiUrl }));
   } finally {
     clearTimeout(timeout);
   }
