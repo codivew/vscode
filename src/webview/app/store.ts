@@ -61,6 +61,11 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
         isSetupComplete: initial.setupComplete,
         status: 'idle' as const,
         message: t('settings.diffDescription'),
+        authenticationType: initial.authenticationType,
+        apiKey: '',
+        username: initial.authenticationUsername,
+        password: '',
+        authenticationConfigured: initial.authenticationConfigured,
       },
     },
   });

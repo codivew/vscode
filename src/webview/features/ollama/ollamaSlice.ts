@@ -13,7 +13,7 @@ export type OllamaState = {
 };
 
 const initialState: OllamaState = {
-  url: 'http://localhost:11434',
+  url: 'http://localhost:11434/v1',
   model: '',
   models: [],
   status: 'idle',

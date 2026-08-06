@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext): void {
   console.info('[Codivew] Extension activated.');
   const diagnostics = vscode.languages.createDiagnosticCollection('codivew');
   const controller = new ReviewController(new ResultsPresenter(diagnostics));
-  const provider = new ReviewViewProvider(controller, context.extensionUri);
+  const provider = new ReviewViewProvider(controller, context.extensionUri, context.secrets);
 
   context.subscriptions.push(
     diagnostics,
@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.window.registerWebviewViewProvider(ReviewViewProvider.viewType, provider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
-    ...registerReviewCommands(controller),
+    ...registerReviewCommands(controller, context.secrets),
   );
 }
 

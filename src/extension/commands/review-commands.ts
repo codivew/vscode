@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
 import { ReviewMode } from 'codivew/core';
 import { getLocale, t } from '../../shared/localization.js';
+import { getStoredAuthentication } from '../authentication.js';
 import { listBaseBranches, type RepositoryBranches } from '../repository/branches.js';
 import type { ReviewController } from '../review/review-controller.js';
 
-export function registerReviewCommands(controller: ReviewController): vscode.Disposable[] {
+export function registerReviewCommands(
+  controller: ReviewController,
+  secrets: vscode.SecretStorage,
+): vscode.Disposable[] {
   return [
-    registerReviewCommand('codivew.reviewWorking', ReviewMode.WORKING, controller),
-    registerReviewCommand('codivew.reviewStaged', ReviewMode.STAGED, controller),
-    registerReviewCommand('codivew.reviewBranch', ReviewMode.BRANCH, controller),
+    registerReviewCommand('codivew.reviewWorking', ReviewMode.WORKING, controller, secrets),
+    registerReviewCommand('codivew.reviewStaged', ReviewMode.STAGED, controller, secrets),
+    registerReviewCommand('codivew.reviewBranch', ReviewMode.BRANCH, controller, secrets),
     vscode.commands.registerCommand('codivew.openLatestReport', () =>
       controller.openLatestReport(),
     ),
@@ -27,6 +31,7 @@ function registerReviewCommand(
   command: string,
   mode: ReviewMode,
   controller: ReviewController,
+  secrets: vscode.SecretStorage,
 ): vscode.Disposable {
   return vscode.commands.registerCommand(command, async () => {
     const folder = await selectWorkspaceFolder();
@@ -46,12 +51,20 @@ function registerReviewCommand(
       mode,
       baseBranch: baseBranch.trim(),
       projectContext: configuration.get<string[]>('projectContext', []),
-      ollamaUrl: configuration.get<string>('ollamaUrl'),
+      ollamaUrl:
+        configuration.get<string>('apiUrl') ?? legacyApiUrl(configuration.get('ollamaUrl')),
       model: configuration.get<string>('model'),
       maxDiffChars: configuration.get<number>('maxDiffChars'),
+      authentication: await getStoredAuthentication(secrets),
       openReport: true,
     });
   });
+}
+
+function legacyApiUrl(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const baseUrl = value.replace(/\/+$/, '');
+  return baseUrl.endsWith('/v1') ? baseUrl : `${baseUrl}/v1`;
 }
 
 async function selectBaseBranch(

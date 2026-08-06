@@ -9,9 +9,15 @@ export type ReviewMessage = {
   selectedFiles: unknown;
 };
 
+export type AuthenticationType = 'none' | 'api-key' | 'basic';
+
 export type LoadModelsMessage = {
   type: 'loadModels';
   ollamaUrl: unknown;
+  authenticationType: unknown;
+  apiKey: unknown;
+  username: unknown;
+  password: unknown;
   requestId: unknown;
 };
 
@@ -40,6 +46,10 @@ export type SaveSettingsMessage = {
   type: 'saveSettings';
   workspaceIndex: unknown;
   ollamaUrl: unknown;
+  authenticationType: unknown;
+  apiKey: unknown;
+  username: unknown;
+  password: unknown;
   model: unknown;
   maxDiffChars: unknown;
   language: unknown;
@@ -162,6 +172,9 @@ export type WebviewInitialState = {
   language: LanguagePreference;
   workspaces: Array<{ index: number; name: string; path: string }>;
   ollamaUrl: string;
+  authenticationType: AuthenticationType;
+  authenticationUsername: string;
+  authenticationConfigured: boolean;
   model: string;
   baseBranch: string;
   maxDiffChars: number;

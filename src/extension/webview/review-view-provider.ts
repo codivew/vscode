@@ -14,21 +14,26 @@ export class ReviewViewProvider implements vscode.WebviewViewProvider, vscode.Di
   constructor(
     controller: ReviewController,
     private readonly extensionUri: vscode.Uri,
+    private readonly secrets: vscode.SecretStorage,
   ) {
-    this.messages = new ReviewMessageHandler(controller, (message) => this.post(message));
+    this.messages = new ReviewMessageHandler(controller, secrets, (message) => this.post(message));
     this.issueStatesSubscription = controller.onDidChangeIssueStates((states) =>
       this.post({ type: 'issueStates', states }),
     );
   }
 
-  resolveWebviewView(view: vscode.WebviewView): void {
+  async resolveWebviewView(view: vscode.WebviewView): Promise<void> {
     this.view = view;
     const distUri = vscode.Uri.joinPath(this.extensionUri, 'dist');
     view.webview.options = {
       enableScripts: true,
       localResourceRoots: [distUri],
     };
-    view.webview.html = createWebviewDocument(view.webview, this.extensionUri, getInitialState());
+    view.webview.html = createWebviewDocument(
+      view.webview,
+      this.extensionUri,
+      await getInitialState(this.secrets),
+    );
     view.webview.onDidReceiveMessage((message: ExtensionMessage) => {
       void this.messages.handle(message);
     });
