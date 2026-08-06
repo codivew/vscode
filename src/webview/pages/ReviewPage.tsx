@@ -120,7 +120,8 @@ const ReviewPage = (): React.JSX.Element => {
     vscode.postMessage({
       type: 'review',
       workspaceIndex: review.workspaceIndex,
-      ollamaUrl: model.url,
+      apiUrl: model.url,
+      apiKey: model.apiKey,
       model: model.model,
       mode: review.mode,
       baseBranch: review.baseBranch,

@@ -7,6 +7,7 @@ import {
   setLocale,
   t,
 } from '../../../shared/localization.js';
+import { hasExplicitApiUrl, resolveApiUrl } from '../../config.js';
 import { numberValue, positiveIntegerValue, stringValue, validHttpUrl } from '../message-values.js';
 import type {
   SaveSettingsMessage,
@@ -20,12 +21,13 @@ export async function saveSettings(message: SaveSettingsMessage): Promise<Settin
   const folders = vscode.workspace.workspaceFolders ?? [];
   const workspaceIndex = numberValue(message.workspaceIndex);
   const folder = workspaceIndex === undefined ? undefined : folders[workspaceIndex];
-  const ollamaUrl = validHttpUrl(message.ollamaUrl);
+  const apiUrl = validHttpUrl(message.apiUrl);
+  const apiKey = stringValue(message.apiKey) ?? '';
   const model = stringValue(message.model);
   const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
   const language = parseLanguagePreference(message.language);
   if (folder === undefined) return error(t('host.defaultWorkspace'));
-  if (ollamaUrl === undefined) return error(t('model.invalidUrl'));
+  if (apiUrl === undefined) return error(t('model.invalidUrl'));
   if (model === undefined) return error(t('host.selectModel'));
   if (maxDiffChars === undefined || maxDiffChars < 1_000) {
     return error(t('host.maxDiffInvalid'));
@@ -33,7 +35,8 @@ export async function saveSettings(message: SaveSettingsMessage): Promise<Settin
   if (language === undefined) return error(t('host.invalidLanguage'));
 
   const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
-  await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
+  await configuration.update('apiUrl', apiUrl, vscode.ConfigurationTarget.Global);
+  await configuration.update('apiKey', apiKey, vscode.ConfigurationTarget.Global);
   await configuration.update('model', model, vscode.ConfigurationTarget.Global);
   await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
   await configuration.update('language', language, vscode.ConfigurationTarget.Global);
@@ -54,11 +57,10 @@ export async function saveSettings(message: SaveSettingsMessage): Promise<Settin
 export function getInitialState(): WebviewInitialState {
   const folders = vscode.workspace.workspaceFolders ?? [];
   const configuration = vscode.workspace.getConfiguration('codivew', folders[0]?.uri);
-  const ollamaUrl = configuration.inspect<string>('ollamaUrl');
   const model = configuration.inspect<string>('model');
-  const configuredOllamaUrl = ollamaUrl?.globalValue ?? ollamaUrl?.workspaceValue;
   const configuredModel = model?.globalValue ?? model?.workspaceValue;
   const language = parseLanguagePreference(configuration.get('language', 'auto')) ?? 'auto';
+  const apiUrl = resolveApiUrl(configuration);
   return {
     locale: getLocale(),
     language,
@@ -67,12 +69,12 @@ export function getInitialState(): WebviewInitialState {
       name: folder.name,
       path: folder.uri.fsPath,
     })),
-    ollamaUrl: configuration.get('ollamaUrl', 'http://localhost:11434'),
+    apiUrl,
+    apiKey: configuration.get('apiKey', ''),
     model: configuration.get('model', 'qwen3.6:35b-a3b-coding-mxfp8'),
     baseBranch: configuration.get('baseBranch', 'main'),
     maxDiffChars: configuration.get('maxDiffChars', DEFAULT_MAX_DIFF_CHARS),
-    setupComplete:
-      validHttpUrl(configuredOllamaUrl) !== undefined && stringValue(configuredModel) !== undefined,
+    setupComplete: hasExplicitApiUrl(configuration) && stringValue(configuredModel) !== undefined,
   };
 }
 

@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import { ReviewMode, type ReviewProgressStage, type RunReviewResult } from 'codivew/core';
+import {
+  ReviewMode,
+  type Authentication,
+  type ReviewProgressStage,
+  type RunReviewResult,
+} from 'codivew/core';
 import { getLocale, t } from '../../shared/localization.js';
 import type { ExtensionMessage, ReviewMessage, WebviewMessage } from '../../shared/protocol.js';
 import { progressMessage, ReviewController } from '../review/review-controller.js';
@@ -14,7 +19,7 @@ import {
 import { getCurrentBranch } from './queries/current-branch.js';
 import { getBranches } from './queries/branches.js';
 import { DiffStatsQuery } from './queries/diff-stats.js';
-import { getOllamaModels } from './queries/ollama-models.js';
+import { getModels } from './queries/models.js';
 import { saveSettings } from './queries/settings.js';
 
 export class ReviewMessageHandler {
@@ -55,7 +60,7 @@ export class ReviewMessageHandler {
         await this.openFile(message.workspaceIndex, message.path);
         return;
       case 'loadModels': {
-        const response = await getOllamaModels(message);
+        const response = await getModels(message);
         if (response !== undefined) this.post(response);
         return;
       }
@@ -123,7 +128,10 @@ export class ReviewMessageHandler {
     const mode = reviewMode(message.mode);
     const baseBranchValue = stringValue(message.baseBranch);
     const baseBranch = baseBranchValue ?? 'main';
-    const ollamaUrl = validHttpUrl(message.ollamaUrl);
+    const apiUrl = validHttpUrl(message.apiUrl);
+    const apiKey = stringValue(message.apiKey);
+    const authentication: Authentication =
+      apiKey === undefined ? { type: 'none' } : { type: 'api-key', apiKey };
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
     const selectedFiles = stringArrayValue(message.selectedFiles);
@@ -131,7 +139,7 @@ export class ReviewMessageHandler {
       this.postState('error', t('host.selectScope'));
       return;
     }
-    if (ollamaUrl === undefined) {
+    if (apiUrl === undefined) {
       this.postState('error', t('model.invalidUrl'));
       return;
     }
@@ -162,7 +170,8 @@ export class ReviewMessageHandler {
         locale: getLocale(),
         mode,
         baseBranch,
-        ollamaUrl,
+        apiUrl,
+        authentication,
         model,
         maxDiffChars,
         selectedFiles,

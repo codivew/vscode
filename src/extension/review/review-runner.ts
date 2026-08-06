@@ -1,17 +1,18 @@
 import { basename } from 'node:path';
 import {
   createGitReviewInput,
+  DEFAULT_API_TIMEOUT_MS,
+  DEFAULT_API_URL,
   DEFAULT_MAX_DIFF_CHARS,
-  DEFAULT_OLLAMA_MODEL,
-  DEFAULT_OLLAMA_TIMEOUT_MS,
-  DEFAULT_OLLAMA_URL,
+  DEFAULT_MODEL,
   DiffFilterService,
   HtmlRendererService,
-  OllamaService,
+  OpenAICompatibleService,
   ReviewMode,
   ReviewPromptService,
   ReviewsService,
   runReview,
+  type Authentication,
   type Language,
   type ReviewProgressStage,
   type RunReviewResult,
@@ -24,7 +25,8 @@ export type RunInput = {
   mode: ReviewMode;
   baseBranch: string;
   projectContext: string[];
-  ollamaUrl?: string;
+  apiUrl?: string;
+  authentication?: Authentication;
   model?: string;
   maxDiffChars?: number;
   selectedFiles?: string[];
@@ -70,10 +72,11 @@ async function runReviewForFiles(
     options.maxDiffChars ?? DEFAULT_MAX_DIFF_CHARS,
     new DiffFilterService(),
     new ReviewPromptService(),
-    new OllamaService({
-      baseUrl: options.ollamaUrl ?? DEFAULT_OLLAMA_URL,
-      model: options.model ?? DEFAULT_OLLAMA_MODEL,
-      timeoutMs: DEFAULT_OLLAMA_TIMEOUT_MS,
+    new OpenAICompatibleService({
+      baseUrl: options.apiUrl ?? DEFAULT_API_URL,
+      model: options.model ?? DEFAULT_MODEL,
+      authentication: options.authentication,
+      timeoutMs: DEFAULT_API_TIMEOUT_MS,
       signal: options.signal,
     }),
     new HtmlRendererService(),

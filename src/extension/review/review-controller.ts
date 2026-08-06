@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import {
   ERROR_CODES,
   ReviewError,
+  type Authentication,
   type Language,
   type ReviewMode,
   type ReviewProgressStage,
@@ -18,7 +19,8 @@ export type ReviewInput = {
   locale: Language;
   mode: ReviewMode;
   baseBranch: string;
-  ollamaUrl?: string;
+  apiUrl?: string;
+  authentication?: Authentication;
   model?: string;
   maxDiffChars?: number;
   projectContext: string[];
@@ -69,7 +71,8 @@ export class ReviewController {
                 mode: input.mode,
                 baseBranch: input.baseBranch,
                 projectContext: input.projectContext,
-                ollamaUrl: input.ollamaUrl,
+                apiUrl: input.apiUrl,
+                authentication: input.authentication,
                 model: input.model,
                 maxDiffChars: input.maxDiffChars,
                 selectedFiles: input.selectedFiles,

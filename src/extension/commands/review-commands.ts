@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ReviewMode } from 'codivew/core';
 import { getLocale, t } from '../../shared/localization.js';
+import { resolveApiUrl, resolveAuthentication } from '../config.js';
 import { listBaseBranches, type RepositoryBranches } from '../repository/branches.js';
 import type { ReviewController } from '../review/review-controller.js';
 
@@ -46,7 +47,8 @@ function registerReviewCommand(
       mode,
       baseBranch: baseBranch.trim(),
       projectContext: configuration.get<string[]>('projectContext', []),
-      ollamaUrl: configuration.get<string>('ollamaUrl'),
+      apiUrl: resolveApiUrl(configuration),
+      authentication: resolveAuthentication(configuration),
       model: configuration.get<string>('model'),
       maxDiffChars: configuration.get<number>('maxDiffChars'),
       openReport: true,

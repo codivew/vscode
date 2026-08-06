@@ -3,7 +3,8 @@ export type ReviewMessage = {
   workspaceIndex: unknown;
   mode: unknown;
   baseBranch: unknown;
-  ollamaUrl: unknown;
+  apiUrl: unknown;
+  apiKey: unknown;
   model: unknown;
   maxDiffChars: unknown;
   selectedFiles: unknown;
@@ -11,7 +12,8 @@ export type ReviewMessage = {
 
 export type LoadModelsMessage = {
   type: 'loadModels';
-  ollamaUrl: unknown;
+  apiUrl: unknown;
+  apiKey: unknown;
   requestId: unknown;
 };
 
@@ -39,7 +41,8 @@ export type LoadBranchesMessage = {
 export type SaveSettingsMessage = {
   type: 'saveSettings';
   workspaceIndex: unknown;
-  ollamaUrl: unknown;
+  apiUrl: unknown;
+  apiKey: unknown;
   model: unknown;
   maxDiffChars: unknown;
   language: unknown;
@@ -161,7 +164,8 @@ export type WebviewInitialState = {
   locale: Locale;
   language: LanguagePreference;
   workspaces: Array<{ index: number; name: string; path: string }>;
-  ollamaUrl: string;
+  apiUrl: string;
+  apiKey: string;
   model: string;
   baseBranch: string;
   maxDiffChars: number;

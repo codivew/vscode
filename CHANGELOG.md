@@ -2,6 +2,26 @@
 
 All notable changes to Codivew for VS Code are documented in this file.
 
+## 0.2.4
+
+### Changed
+
+- Migrated the review engine to `codivew` 0.4.0, which reviews through any OpenAI-compatible API
+  instead of only Ollama's native API.
+- Renamed the `codivew.ollamaUrl` setting to `codivew.apiUrl` (default
+  `http://localhost:11434/v1`). Existing `ollamaUrl` values are picked up automatically, so no
+  manual migration is required.
+- Reworded interface text that referred to "Ollama" specifically (setting labels, connection
+  status messages, and the README) to describe a generic AI server, since Codivew now works with
+  any OpenAI-compatible endpoint, including but not limited to Ollama.
+- The model list is now requested from the server's OpenAI-compatible `/models` endpoint instead
+  of Ollama's native `/api/tags`.
+
+### Added
+
+- A `codivew.apiKey` setting and matching Settings field for servers that require Bearer token
+  authentication.
+
 ## 0.2.3
 
 ### Added

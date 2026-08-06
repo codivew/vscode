@@ -143,6 +143,12 @@ const messages = {
     'This address is saved in your Codivew user settings.',
     '입력한 주소는 Codivew 사용자 설정에 저장됩니다.',
   ],
+  'model.apiKey': ['API Key', 'API 키'],
+  'model.apiKeyPlaceholder': ['Optional', '선택 사항'],
+  'model.apiKeyHint': [
+    'Only needed for servers that require authentication. Sent as a Bearer token.',
+    '인증이 필요한 서버에만 입력하세요. Bearer 토큰으로 전송됩니다.',
+  ],
   'model.label': ['Model', '모델'],
   'model.loading': ['Loading models...', '모델 조회 중...'],
   'model.none': ['No models available', '선택 가능한 모델이 없습니다'],
@@ -202,7 +208,7 @@ const messages = {
     'Could not determine the review scope.',
     '리뷰 범위를 확인할 수 없습니다.',
   ],
-  'host.invalidOllamaUrl': ['Enter a valid server URL.', '올바른 서버 URL을 입력하세요.'],
+  'host.invalidApiUrl': ['Enter a valid server URL.', '올바른 서버 URL을 입력하세요.'],
   'host.noInstalledModels': [
     'No models are installed on the server.',
     '서버에 설치된 모델이 없습니다.',
@@ -212,7 +218,7 @@ const messages = {
     'Could not load the model list. (HTTP {status})',
     '모델 목록을 불러오지 못했습니다. (HTTP {status})',
   ],
-  'host.ollamaConnectionError': [
+  'host.serverConnectionError': [
     'Could not connect to the server: {url}',
     '서버에 연결할 수 없습니다: {url}',
   ],

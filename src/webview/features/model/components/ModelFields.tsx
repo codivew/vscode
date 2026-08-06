@@ -4,7 +4,13 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
 import { vscode } from '../../../app/vscode-api.js';
 import Field from '../../../shared/components/Field.js';
 import { validHttpUrl } from '../../../shared/url.js';
-import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../modelSlice.js';
+import {
+  apiKeyChanged,
+  modelChanged,
+  modelsInvalidated,
+  modelsRequested,
+  urlChanged,
+} from '../modelSlice.js';
 import styles from './ModelFields.module.css';
 import { t } from '../../../../shared/localization.js';
 
@@ -36,10 +42,15 @@ const ModelFields = ({
 
     dispatch(modelsRequested(requestId));
     const timeout = window.setTimeout(() => {
-      vscode.postMessage({ type: 'loadModels', ollamaUrl: validUrl, requestId });
+      vscode.postMessage({
+        type: 'loadModels',
+        apiUrl: validUrl,
+        apiKey: model.apiKey,
+        requestId,
+      });
     }, 400);
     return (): void => window.clearTimeout(timeout);
-  }, [dispatch, model.url]);
+  }, [dispatch, model.url, model.apiKey]);
 
   return (
     <>
@@ -48,12 +59,25 @@ const ModelFields = ({
           id="model-url"
           type="url"
           value={model.url}
-          placeholder="http://localhost:11434"
+          placeholder="http://localhost:11434/v1"
           disabled={disabled}
           onChange={(event) => dispatch(urlChanged(event.target.value))}
           required
         />
         <div className={styles.hint}>{t('model.urlHint')}</div>
+      </Field>
+
+      <Field label={t('model.apiKey')} htmlFor="model-api-key" className={fieldClassName}>
+        <input
+          id="model-api-key"
+          type="password"
+          value={model.apiKey}
+          placeholder={t('model.apiKeyPlaceholder')}
+          disabled={disabled}
+          autoComplete="off"
+          onChange={(event) => dispatch(apiKeyChanged(event.target.value))}
+        />
+        <div className={styles.hint}>{t('model.apiKeyHint')}</div>
       </Field>
 
       <Field label={t('model.label')} htmlFor="model" className={fieldClassName}>

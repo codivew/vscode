@@ -13,3 +13,4 @@ media/codivew-icon-*.png
 .prettierrc
 eslint.config.mjs
 package-lock.json
+.claude/
