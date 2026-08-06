@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import {
   ERROR_CODES,
   ReviewError,
+  type Authentication,
   type Language,
   type ReviewMode,
   type ReviewProgressStage,
@@ -24,6 +25,7 @@ export type ReviewInput = {
   projectContext: string[];
   selectedFiles?: string[];
   openReport: boolean;
+  authentication?: Authentication;
 };
 
 export type ReviewHooks = {
@@ -73,6 +75,7 @@ export class ReviewController {
                 model: input.model,
                 maxDiffChars: input.maxDiffChars,
                 selectedFiles: input.selectedFiles,
+                authentication: input.authentication,
               },
               controller.signal,
               (stage) => {

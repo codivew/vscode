@@ -10,12 +10,12 @@ import { runTests } from '@vscode/test-electron';
 const extensionRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const execFileAsync = promisify(execFile);
 const fixtureRepository = await createFixtureRepository();
-const ollama = await startMockOllama();
+const api = await startMockApi();
 try {
   await runTests({
     extensionDevelopmentPath: extensionRoot,
     extensionTestsPath: resolve(extensionRoot, 'test/suite/index.cjs'),
-    extensionTestsEnv: { CODIVEW_TEST_OLLAMA_URL: ollama.url },
+    extensionTestsEnv: { CODIVEW_TEST_API_URL: api.url },
     launchArgs: [fixtureRepository, '--disable-workspace-trust'],
   });
 } catch (error) {
@@ -23,7 +23,7 @@ try {
   console.error(error);
   process.exitCode = 1;
 } finally {
-  await ollama.close();
+  await api.close();
   await rm(fixtureRepository, { recursive: true, force: true });
 }
 
@@ -40,17 +40,17 @@ async function createFixtureRepository() {
   return repository;
 }
 
-async function startMockOllama() {
-  let tagsRequestCount = 0;
+async function startMockApi() {
+  let modelsRequestCount = 0;
   const server = createServer((request, response) => {
     response.writeHead(200, { 'content-type': 'application/json' });
-    if (request.method === 'GET' && request.url === '/api/tags') {
-      tagsRequestCount += 1;
-      response.end(JSON.stringify({ models: [{ name: 'codivew-test-model' }] }));
+    if (request.method === 'GET' && request.url === '/v1/models') {
+      modelsRequestCount += 1;
+      response.end(JSON.stringify({ data: [{ id: 'codivew-test-model' }] }));
       return;
     }
     if (request.method === 'GET' && request.url === '/test/state') {
-      response.end(JSON.stringify({ tagsRequestCount }));
+      response.end(JSON.stringify({ modelsRequestCount }));
       return;
     }
     response.end(
@@ -81,7 +81,7 @@ async function startMockOllama() {
   if (address === null || typeof address === 'string') throw new Error('Mock Ollama port missing.');
 
   return {
-    url: `http://127.0.0.1:${address.port}`,
+    url: `http://127.0.0.1:${address.port}/v1`,
     close: () => new Promise((resolveClose) => server.close(resolveClose)),
   };
 }

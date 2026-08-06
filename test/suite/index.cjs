@@ -19,10 +19,10 @@ async function run() {
   assert.ok(commands.includes('codivew.reviewView.focus'));
   console.log('✓ activates and registers review commands');
 
-  const ollamaUrl = process.env.CODIVEW_TEST_OLLAMA_URL;
-  assert.ok(ollamaUrl, 'Mock Ollama URL should be provided by the test runner.');
+  const apiUrl = process.env.CODIVEW_TEST_API_URL;
+  assert.ok(apiUrl, 'Mock API URL should be provided by the test runner.');
   const configuration = vscode.workspace.getConfiguration('codivew');
-  await configuration.update('ollamaUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
+  await configuration.update('apiUrl', apiUrl, vscode.ConfigurationTarget.Global);
   await configuration.update('model', 'codivew-test-model', vscode.ConfigurationTarget.Global);
   await configuration.update('maxDiffChars', 120_000, vscode.ConfigurationTarget.Global);
   assert.equal(configuration.get('maxDiffChars'), 120_000);

@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t, type LanguagePreference, type Locale } from '../../../shared/localization.js';
 import type { RootState } from '../../app/store.js';
+import type { AuthenticationType } from '../../../shared/protocol.js';
 
 export type SettingsStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -13,6 +14,11 @@ export type SettingsState = {
   isSetupComplete: boolean;
   status: SettingsStatus;
   message: string;
+  authenticationType: AuthenticationType;
+  apiKey: string;
+  username: string;
+  password: string;
+  authenticationConfigured: boolean;
 };
 
 const initialState: SettingsState = {
@@ -24,6 +30,11 @@ const initialState: SettingsState = {
   isSetupComplete: false,
   status: 'idle',
   message: t('settings.diffDescription'),
+  authenticationType: 'none',
+  apiKey: '',
+  username: '',
+  password: '',
+  authenticationConfigured: false,
 };
 
 export const settingsSlice = createSlice({
@@ -39,6 +50,24 @@ export const settingsSlice = createSlice({
       state.draftLanguage = action.payload;
       state.status = 'idle';
       state.message = t('settings.changed');
+    },
+    authenticationTypeChanged(state, action: PayloadAction<AuthenticationType>) {
+      state.authenticationType = action.payload;
+      state.apiKey = '';
+      state.password = '';
+      state.authenticationConfigured = action.payload === 'none';
+    },
+    apiKeyChanged(state, action: PayloadAction<string>) {
+      state.apiKey = action.payload;
+      state.authenticationConfigured = false;
+    },
+    usernameChanged(state, action: PayloadAction<string>) {
+      state.username = action.payload;
+      state.authenticationConfigured = false;
+    },
+    passwordChanged(state, action: PayloadAction<string>) {
+      state.password = action.payload;
+      state.authenticationConfigured = false;
     },
     settingsSaveRequested(state) {
       state.status = 'saving';
@@ -69,15 +98,24 @@ export const settingsSlice = createSlice({
         state.draftLanguage = action.payload.language;
       }
       if (action.payload.locale !== undefined) state.locale = action.payload.locale;
+      if (action.payload.status === 'saved') {
+        state.authenticationConfigured = true;
+        state.apiKey = '';
+        state.password = '';
+      }
     },
   },
 });
 
 export const {
+  apiKeyChanged,
+  authenticationTypeChanged,
   draftLanguageChanged,
   draftMaxDiffCharsChanged,
   settingsSaveRequested,
   settingsReceived,
+  usernameChanged,
+  passwordChanged,
 } = settingsSlice.actions;
 
 export const selectIsSetupComplete = (state: RootState): boolean => state.settings.isSetupComplete;

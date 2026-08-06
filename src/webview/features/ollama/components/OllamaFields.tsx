@@ -19,6 +19,7 @@ const OllamaFields = ({
 }): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const ollama = useAppSelector((state) => state.ollama);
+  const settings = useAppSelector((state) => state.settings);
   const hasModels = ollama.status === 'loaded' && ollama.models.length > 0;
 
   useEffect(() => {
@@ -36,19 +37,34 @@ const OllamaFields = ({
 
     dispatch(modelsRequested(requestId));
     const timeout = window.setTimeout(() => {
-      vscode.postMessage({ type: 'loadModels', ollamaUrl: validUrl, requestId });
+      vscode.postMessage({
+        type: 'loadModels',
+        ollamaUrl: validUrl,
+        authenticationType: settings.authenticationType,
+        apiKey: settings.apiKey,
+        username: settings.username,
+        password: settings.password,
+        requestId,
+      });
     }, 400);
     return (): void => window.clearTimeout(timeout);
-  }, [dispatch, ollama.url]);
+  }, [
+    dispatch,
+    ollama.url,
+    settings.apiKey,
+    settings.authenticationType,
+    settings.password,
+    settings.username,
+  ]);
 
   return (
     <>
-      <Field label="Ollama URL" htmlFor="ollama-url" className={fieldClassName}>
+      <Field label="API URL" htmlFor="ollama-url" className={fieldClassName}>
         <input
           id="ollama-url"
           type="url"
           value={ollama.url}
-          placeholder="http://localhost:11434"
+          placeholder="http://localhost:11434/v1"
           disabled={disabled}
           onChange={(event) => dispatch(urlChanged(event.target.value))}
           required

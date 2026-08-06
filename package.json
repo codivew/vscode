@@ -95,10 +95,10 @@
           "default": "auto",
           "description": "%config.language%"
         },
-        "codivew.ollamaUrl": {
+        "codivew.apiUrl": {
           "type": "string",
-          "default": "http://localhost:11434",
-          "description": "%config.ollamaUrl%"
+          "default": "http://localhost:11434/v1",
+          "description": "%config.apiUrl%"
         },
         "codivew.model": {
           "type": "string",
@@ -140,7 +140,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
-    "codivew": "^0.3.2",
+    "codivew": "^0.4.0",
     "lucide-react": "^1.28.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
