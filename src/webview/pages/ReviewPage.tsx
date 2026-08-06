@@ -26,11 +26,11 @@ const ReviewPage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const review = useAppSelector((state) => state.review);
-  const ollama = useAppSelector((state) => state.ollama);
+  const model = useAppSelector((state) => state.model);
   const maxDiffChars = useAppSelector((state) => state.settings.maxDiffChars);
   const running = review.status === 'running';
   const hasWorkspace = review.workspaces.length > 0;
-  const hasModel = ollama.model.trim().length > 0;
+  const hasModel = model.model.trim().length > 0;
   const workspace = review.workspaces.find((item) => item.index === review.workspaceIndex);
   const diffTooLarge = review.diffStats.filteredCharCount > review.diffStats.maxDiffChars;
 
@@ -120,8 +120,8 @@ const ReviewPage = (): React.JSX.Element => {
     vscode.postMessage({
       type: 'review',
       workspaceIndex: review.workspaceIndex,
-      ollamaUrl: ollama.url,
-      model: ollama.model,
+      ollamaUrl: model.url,
+      model: model.model,
       mode: review.mode,
       baseBranch: review.baseBranch,
       maxDiffChars,
@@ -135,7 +135,7 @@ const ReviewPage = (): React.JSX.Element => {
         <div>
           <span>{t('review.environment')}</span>
           <strong>{workspace?.name ?? t('review.noWorkspace')}</strong>
-          <small>{ollama.model || t('review.noModel')}</small>
+          <small>{model.model || t('review.noModel')}</small>
         </div>
         <button
           className={styles.textButton}

@@ -25,7 +25,7 @@ export async function saveSettings(message: SaveSettingsMessage): Promise<Settin
   const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
   const language = parseLanguagePreference(message.language);
   if (folder === undefined) return error(t('host.defaultWorkspace'));
-  if (ollamaUrl === undefined) return error(t('ollama.invalidUrl'));
+  if (ollamaUrl === undefined) return error(t('model.invalidUrl'));
   if (model === undefined) return error(t('host.selectModel'));
   if (maxDiffChars === undefined || maxDiffChars < 1_000) {
     return error(t('host.maxDiffInvalid'));

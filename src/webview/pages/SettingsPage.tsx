@@ -5,7 +5,7 @@ import { vscode } from '../app/vscode-api.js';
 import Field from '../shared/components/Field.js';
 import { formatNumber } from '../shared/format.js';
 import { validHttpUrl } from '../shared/url.js';
-import OllamaFields from '../features/ollama/components/OllamaFields.js';
+import ModelFields from '../features/model/components/ModelFields.js';
 import { workspaceChanged } from '../features/review/reviewSlice.js';
 import {
   draftLanguageChanged,
@@ -21,13 +21,13 @@ const SettingsPage = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const settings = useAppSelector((state) => state.settings);
   const review = useAppSelector((state) => state.review);
-  const ollama = useAppSelector((state) => state.ollama);
+  const model = useAppSelector((state) => state.model);
   const hasWorkspace = review.workspaces.length > 0 && review.workspaceIndex >= 0;
-  const hasModels = ollama.status === 'loaded' && ollama.models.length > 0;
+  const hasModels = model.status === 'loaded' && model.models.length > 0;
   const validConfiguration =
     hasWorkspace &&
-    validHttpUrl(ollama.url) !== undefined &&
-    ollama.model.trim().length > 0 &&
+    validHttpUrl(model.url) !== undefined &&
+    model.model.trim().length > 0 &&
     (settings.isSetupComplete || hasModels);
 
   const submit = (event: FormEvent<HTMLFormElement>): void => {
@@ -36,8 +36,8 @@ const SettingsPage = (): React.JSX.Element => {
     vscode.postMessage({
       type: 'saveSettings',
       workspaceIndex: review.workspaceIndex,
-      ollamaUrl: ollama.url,
-      model: ollama.model,
+      ollamaUrl: model.url,
+      model: model.model,
       maxDiffChars: settings.draftMaxDiffChars,
       language: settings.draftLanguage,
     });
@@ -88,7 +88,7 @@ const SettingsPage = (): React.JSX.Element => {
         <div className={styles.hint}>{t('settings.languageHint')}</div>
       </Field>
 
-      <OllamaFields disabled={settings.status === 'saving'} fieldClassName={styles.field} />
+      <ModelFields disabled={settings.status === 'saving'} fieldClassName={styles.field} />
 
       <div className={styles.divider} />
 

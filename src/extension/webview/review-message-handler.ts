@@ -132,7 +132,7 @@ export class ReviewMessageHandler {
       return;
     }
     if (ollamaUrl === undefined) {
-      this.postState('error', t('ollama.invalidUrl'));
+      this.postState('error', t('model.invalidUrl'));
       return;
     }
     if (model === undefined) {
