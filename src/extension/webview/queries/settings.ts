@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DEFAULT_API_URL, DEFAULT_MAX_DIFF_CHARS, DEFAULT_MODEL, setLanguage } from 'codivew/core';
+import { DEFAULT_MAX_DIFF_CHARS, DEFAULT_MODEL, setLanguage } from 'codivew/core';
 import {
   getStoredAuthentication,
   resolveAuthentication,
@@ -12,6 +12,7 @@ import {
   setLocale,
   t,
 } from '../../../shared/localization.js';
+import { hasExplicitApiUrl, resolveApiUrl } from '../../config.js';
 import { numberValue, positiveIntegerValue, stringValue, validHttpUrl } from '../message-values.js';
 import type {
   SaveSettingsMessage,
@@ -28,13 +29,13 @@ export async function saveSettings(
   const folders = vscode.workspace.workspaceFolders ?? [];
   const workspaceIndex = numberValue(message.workspaceIndex);
   const folder = workspaceIndex === undefined ? undefined : folders[workspaceIndex];
-  const ollamaUrl = validHttpUrl(message.ollamaUrl);
+  const apiUrl = validHttpUrl(message.apiUrl);
   const model = stringValue(message.model);
   const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
   const language = parseLanguagePreference(message.language);
   const authentication = await resolveAuthentication(message, secrets);
   if (folder === undefined) return error(t('host.defaultWorkspace'));
-  if (ollamaUrl === undefined) return error(t('model.invalidUrl'));
+  if (apiUrl === undefined) return error(t('model.invalidUrl'));
   if (model === undefined) return error(t('host.selectModel'));
   if (maxDiffChars === undefined || maxDiffChars < 1_000) {
     return error(t('host.maxDiffInvalid'));
@@ -43,7 +44,7 @@ export async function saveSettings(
   if (authentication === undefined) return error(t('host.invalidAuthentication'));
 
   const configuration = vscode.workspace.getConfiguration('codivew', folder.uri);
-  await configuration.update('apiUrl', ollamaUrl, vscode.ConfigurationTarget.Global);
+  await configuration.update('apiUrl', apiUrl, vscode.ConfigurationTarget.Global);
   await configuration.update('model', model, vscode.ConfigurationTarget.Global);
   await configuration.update('maxDiffChars', maxDiffChars, vscode.ConfigurationTarget.Global);
   await configuration.update('language', language, vscode.ConfigurationTarget.Global);
@@ -65,15 +66,10 @@ export async function saveSettings(
 export async function getInitialState(secrets: vscode.SecretStorage): Promise<WebviewInitialState> {
   const folders = vscode.workspace.workspaceFolders ?? [];
   const configuration = vscode.workspace.getConfiguration('codivew', folders[0]?.uri);
-  const apiUrl = configuration.inspect<string>('apiUrl');
-  const legacyOllamaUrl = configuration.inspect<string>('ollamaUrl');
   const model = configuration.inspect<string>('model');
-  const configuredApiUrl =
-    apiUrl?.globalValue ??
-    apiUrl?.workspaceValue ??
-    legacyApiUrl(legacyOllamaUrl?.globalValue ?? legacyOllamaUrl?.workspaceValue);
   const configuredModel = model?.globalValue ?? model?.workspaceValue;
   const language = parseLanguagePreference(configuration.get('language', 'auto')) ?? 'auto';
+  const apiUrl = resolveApiUrl(configuration);
   const authentication = await getStoredAuthentication(secrets);
   return {
     locale: getLocale(),
@@ -83,22 +79,15 @@ export async function getInitialState(secrets: vscode.SecretStorage): Promise<We
       name: folder.name,
       path: folder.uri.fsPath,
     })),
-    ollamaUrl: configuredApiUrl ?? DEFAULT_API_URL,
+    apiUrl,
     authenticationType: authentication.type,
     authenticationUsername: authentication.type === 'basic' ? authentication.username : '',
     authenticationConfigured: authentication.type !== 'none',
     model: configuration.get('model', DEFAULT_MODEL),
     baseBranch: configuration.get('baseBranch', 'main'),
     maxDiffChars: configuration.get('maxDiffChars', DEFAULT_MAX_DIFF_CHARS),
-    setupComplete:
-      validHttpUrl(configuredApiUrl) !== undefined && stringValue(configuredModel) !== undefined,
+    setupComplete: hasExplicitApiUrl(configuration) && stringValue(configuredModel) !== undefined,
   };
-}
-
-function legacyApiUrl(value: string | undefined): string | undefined {
-  if (value === undefined) return undefined;
-  const baseUrl = value.replace(/\/+$/, '');
-  return baseUrl.endsWith('/v1') ? baseUrl : `${baseUrl}/v1`;
 }
 
 function error(message: string): SettingsResponse {

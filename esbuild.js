@@ -10,6 +10,7 @@ await Promise.all([
     outfile: 'dist/extension.cjs',
     external: ['vscode'],
     sourcemap: true,
+    minify: true,
     logLevel: 'info',
   }),
   build({

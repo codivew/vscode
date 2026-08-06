@@ -10,12 +10,12 @@ import { runTests } from '@vscode/test-electron';
 const extensionRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const execFileAsync = promisify(execFile);
 const fixtureRepository = await createFixtureRepository();
-const api = await startMockApi();
+const apiServer = await startMockApiServer();
 try {
   await runTests({
     extensionDevelopmentPath: extensionRoot,
     extensionTestsPath: resolve(extensionRoot, 'test/suite/index.cjs'),
-    extensionTestsEnv: { CODIVEW_TEST_API_URL: api.url },
+    extensionTestsEnv: { CODIVEW_TEST_API_URL: apiServer.url },
     launchArgs: [fixtureRepository, '--disable-workspace-trust'],
   });
 } catch (error) {
@@ -23,7 +23,7 @@ try {
   console.error(error);
   process.exitCode = 1;
 } finally {
-  await api.close();
+  await apiServer.close();
   await rm(fixtureRepository, { recursive: true, force: true });
 }
 
@@ -40,7 +40,7 @@ async function createFixtureRepository() {
   return repository;
 }
 
-async function startMockApi() {
+async function startMockApiServer() {
   let modelsRequestCount = 0;
   const server = createServer((request, response) => {
     response.writeHead(200, { 'content-type': 'application/json' });
@@ -55,30 +55,36 @@ async function startMockApi() {
     }
     response.end(
       JSON.stringify({
-        message: {
-          content: JSON.stringify({
-            verdict: 'comment',
-            risk: 'low',
-            summary: '테스트 리뷰입니다.',
-            issues: [
-              {
-                severity: 'suggestion',
-                confidence: 0.95,
-                file: 'value.ts',
-                line: 1,
-                title: '변경값 확인',
-                description: '의도한 값 변경인지 확인하세요.',
-              },
-            ],
-            tests: [],
-          }),
-        },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                verdict: 'comment',
+                risk: 'low',
+                summary: '테스트 리뷰입니다.',
+                issues: [
+                  {
+                    severity: 'suggestion',
+                    confidence: 0.95,
+                    file: 'value.ts',
+                    line: 1,
+                    title: '변경값 확인',
+                    description: '의도한 값 변경인지 확인하세요.',
+                  },
+                ],
+                tests: [],
+              }),
+            },
+          },
+        ],
       }),
     );
   });
   await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
   const address = server.address();
-  if (address === null || typeof address === 'string') throw new Error('Mock Ollama port missing.');
+  if (address === null || typeof address === 'string') {
+    throw new Error('Mock API server port missing.');
+  }
 
   return {
     url: `http://127.0.0.1:${address.port}/v1`,

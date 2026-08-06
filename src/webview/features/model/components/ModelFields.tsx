@@ -39,7 +39,7 @@ const ModelFields = ({
     const timeout = window.setTimeout(() => {
       vscode.postMessage({
         type: 'loadModels',
-        ollamaUrl: validUrl,
+        apiUrl: validUrl,
         authenticationType: settings.authenticationType,
         apiKey: settings.apiKey,
         username: settings.username,

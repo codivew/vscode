@@ -221,7 +221,7 @@ const messages = {
     'Could not determine the review scope.',
     '리뷰 범위를 확인할 수 없습니다.',
   ],
-  'host.invalidOllamaUrl': ['Enter a valid API URL.', '올바른 API URL을 입력하세요.'],
+  'host.invalidApiUrl': ['Enter a valid API URL.', '올바른 API URL을 입력하세요.'],
   'host.noInstalledModels': [
     'No models are available from the API.',
     'API에서 사용 가능한 모델이 없습니다.',
@@ -231,7 +231,7 @@ const messages = {
     'Could not load the model list. (HTTP {status})',
     '모델 목록을 불러오지 못했습니다. (HTTP {status})',
   ],
-  'host.ollamaConnectionError': [
+  'host.apiConnectionError': [
     'Could not connect to the API: {url}',
     'API에 연결할 수 없습니다: {url}',
   ],

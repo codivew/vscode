@@ -11,16 +11,16 @@ type ModelsResponseBody = {
   data?: unknown;
 };
 
-export async function getOllamaModels(
+export async function getModels(
   message: LoadModelsMessage,
   secrets: vscode.SecretStorage,
 ): Promise<ModelsResponse | undefined> {
   const requestId = numberValue(message.requestId);
   if (requestId === undefined) return undefined;
 
-  const ollamaUrl = validHttpUrl(message.ollamaUrl);
-  if (ollamaUrl === undefined) {
-    return error(requestId, t('host.invalidOllamaUrl'));
+  const apiUrl = validHttpUrl(message.apiUrl);
+  if (apiUrl === undefined) {
+    return error(requestId, t('host.invalidApiUrl'));
   }
   const authentication = await resolveAuthentication(message, secrets);
   if (authentication === undefined) {
@@ -30,7 +30,7 @@ export async function getOllamaModels(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5_000);
   try {
-    const response = await fetch(`${ollamaUrl.replace(/\/+$/, '')}/models`, {
+    const response = await fetch(`${apiUrl.replace(/\/+$/, '')}/models`, {
       signal: controller.signal,
       headers: authenticationHeaders(authentication),
     });
@@ -51,7 +51,7 @@ export async function getOllamaModels(
           : t('host.modelsLoaded', { count: models.length }),
     };
   } catch {
-    return error(requestId, t('host.ollamaConnectionError', { url: ollamaUrl }));
+    return error(requestId, t('host.apiConnectionError', { url: apiUrl }));
   } finally {
     clearTimeout(timeout);
   }
@@ -67,8 +67,8 @@ function parseModelNames(value: unknown): string[] {
     ...new Set(
       value.flatMap((model) => {
         if (typeof model !== 'object' || model === null) return [];
-        const name = stringValue((model as Record<string, unknown>)['id']);
-        return name === undefined ? [] : [name];
+        const id = stringValue((model as Record<string, unknown>)['id']);
+        return id === undefined ? [] : [id];
       }),
     ),
   ].sort((left, right) => left.localeCompare(right));

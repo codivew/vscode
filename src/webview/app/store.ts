@@ -23,7 +23,7 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
     reducer: combinedReducer,
     preloadedState: {
       model: {
-        url: initial.ollamaUrl,
+        url: initial.apiUrl,
         model: initial.model,
         models: [],
         status: 'idle' as const,

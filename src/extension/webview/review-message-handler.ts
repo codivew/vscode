@@ -15,7 +15,7 @@ import {
 import { getCurrentBranch } from './queries/current-branch.js';
 import { getBranches } from './queries/branches.js';
 import { DiffStatsQuery } from './queries/diff-stats.js';
-import { getOllamaModels } from './queries/ollama-models.js';
+import { getModels } from './queries/models.js';
 import { saveSettings } from './queries/settings.js';
 
 export class ReviewMessageHandler {
@@ -57,7 +57,7 @@ export class ReviewMessageHandler {
         await this.openFile(message.workspaceIndex, message.path);
         return;
       case 'loadModels': {
-        const response = await getOllamaModels(message, this.secrets);
+        const response = await getModels(message, this.secrets);
         if (response !== undefined) this.post(response);
         return;
       }
@@ -125,7 +125,7 @@ export class ReviewMessageHandler {
     const mode = reviewMode(message.mode);
     const baseBranchValue = stringValue(message.baseBranch);
     const baseBranch = baseBranchValue ?? 'main';
-    const ollamaUrl = validHttpUrl(message.ollamaUrl);
+    const apiUrl = validHttpUrl(message.apiUrl);
     const model = stringValue(message.model);
     const maxDiffChars = positiveIntegerValue(message.maxDiffChars);
     const selectedFiles = stringArrayValue(message.selectedFiles);
@@ -133,7 +133,7 @@ export class ReviewMessageHandler {
       this.postState('error', t('host.selectScope'));
       return;
     }
-    if (ollamaUrl === undefined) {
+    if (apiUrl === undefined) {
       this.postState('error', t('model.invalidUrl'));
       return;
     }
@@ -164,7 +164,7 @@ export class ReviewMessageHandler {
         locale: getLocale(),
         mode,
         baseBranch,
-        ollamaUrl,
+        apiUrl,
         model,
         maxDiffChars,
         selectedFiles,

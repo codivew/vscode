@@ -19,13 +19,13 @@ export type ReviewInput = {
   locale: Language;
   mode: ReviewMode;
   baseBranch: string;
-  ollamaUrl?: string;
+  apiUrl?: string;
+  authentication?: Authentication;
   model?: string;
   maxDiffChars?: number;
   projectContext: string[];
   selectedFiles?: string[];
   openReport: boolean;
-  authentication?: Authentication;
 };
 
 export type ReviewHooks = {
@@ -71,11 +71,11 @@ export class ReviewController {
                 mode: input.mode,
                 baseBranch: input.baseBranch,
                 projectContext: input.projectContext,
-                ollamaUrl: input.ollamaUrl,
+                apiUrl: input.apiUrl,
+                authentication: input.authentication,
                 model: input.model,
                 maxDiffChars: input.maxDiffChars,
                 selectedFiles: input.selectedFiles,
-                authentication: input.authentication,
               },
               controller.signal,
               (stage) => {

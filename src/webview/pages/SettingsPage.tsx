@@ -47,7 +47,7 @@ const SettingsPage = (): React.JSX.Element => {
     vscode.postMessage({
       type: 'saveSettings',
       workspaceIndex: review.workspaceIndex,
-      ollamaUrl: model.url,
+      apiUrl: model.url,
       authenticationType: settings.authenticationType,
       apiKey: settings.apiKey,
       username: settings.username,

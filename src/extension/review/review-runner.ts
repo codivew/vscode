@@ -25,11 +25,11 @@ export type RunInput = {
   mode: ReviewMode;
   baseBranch: string;
   projectContext: string[];
-  ollamaUrl?: string;
+  apiUrl?: string;
+  authentication?: Authentication;
   model?: string;
   maxDiffChars?: number;
   selectedFiles?: string[];
-  authentication?: Authentication;
 };
 
 export async function executeReview(
@@ -37,12 +37,7 @@ export async function executeReview(
   signal: AbortSignal,
   onProgress: (stage: ReviewProgressStage) => void,
 ): Promise<RunReviewResult> {
-  const options = {
-    ...input,
-    apiUrl: input.ollamaUrl,
-    signal,
-    onProgress,
-  };
+  const options = { ...input, signal, onProgress };
   return input.selectedFiles === undefined
     ? runReview(options)
     : runReviewForFiles(options, input.selectedFiles);
@@ -78,7 +73,7 @@ async function runReviewForFiles(
     new DiffFilterService(),
     new ReviewPromptService(),
     new OpenAICompatibleService({
-      baseUrl: options.ollamaUrl ?? DEFAULT_API_URL,
+      baseUrl: options.apiUrl ?? DEFAULT_API_URL,
       model: options.model ?? DEFAULT_MODEL,
       authentication: options.authentication,
       timeoutMs: DEFAULT_API_TIMEOUT_MS,
