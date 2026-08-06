@@ -1,5 +1,5 @@
 import { combineSlices, configureStore, type EnhancedStore } from '@reduxjs/toolkit';
-import { ollamaSlice } from '../features/ollama/ollamaSlice.js';
+import { modelSlice } from '../features/model/modelSlice.js';
 import { emptyDiffStats, reviewSlice } from '../features/review/reviewSlice.js';
 import { settingsSlice } from '../features/settings/settingsSlice.js';
 import type { WebviewInitialState } from '../../shared/protocol.js';
@@ -9,7 +9,7 @@ import { t } from '../../shared/localization.js';
 export type RootState = ReturnType<typeof combinedReducer>;
 export type AppStore = EnhancedStore<RootState>;
 
-const combinedReducer = combineSlices(ollamaSlice, reviewSlice, settingsSlice);
+const combinedReducer = combineSlices(modelSlice, reviewSlice, settingsSlice);
 
 export function createAppStore(initial: WebviewInitialState, persisted?: PersistedState): AppStore {
   const maxDiffChars = initial.maxDiffChars;
@@ -22,12 +22,12 @@ export function createAppStore(initial: WebviewInitialState, persisted?: Persist
   return configureStore({
     reducer: combinedReducer,
     preloadedState: {
-      ollama: {
+      model: {
         url: initial.ollamaUrl,
         model: initial.model,
         models: [],
         status: 'idle' as const,
-        message: t('ollama.enterUrl'),
+        message: t('model.enterUrl'),
         requestId: 0,
       },
       review: {

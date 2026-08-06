@@ -3,7 +3,7 @@ import { t } from '../../../shared/localization.js';
 
 export type ModelsStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
-export type OllamaState = {
+export type ModelState = {
   url: string;
   model: string;
   models: string[];
@@ -12,17 +12,17 @@ export type OllamaState = {
   requestId: number;
 };
 
-const initialState: OllamaState = {
+const initialState: ModelState = {
   url: 'http://localhost:11434/v1',
   model: '',
   models: [],
   status: 'idle',
-  message: t('ollama.enterUrl'),
+  message: t('model.enterUrl'),
   requestId: 0,
 };
 
-export const ollamaSlice = createSlice({
-  name: 'ollama',
+export const modelSlice = createSlice({
+  name: 'model',
   initialState,
   reducers: {
     urlChanged(state, action: PayloadAction<string>) {
@@ -40,7 +40,7 @@ export const ollamaSlice = createSlice({
     modelsRequested(state, action: PayloadAction<number>) {
       state.models = [];
       state.status = 'loading';
-      state.message = t('ollama.fetching');
+      state.message = t('model.fetching');
       state.requestId = action.payload;
     },
     modelsReceived(
@@ -64,4 +64,4 @@ export const ollamaSlice = createSlice({
 });
 
 export const { urlChanged, modelChanged, modelsInvalidated, modelsRequested, modelsReceived } =
-  ollamaSlice.actions;
+  modelSlice.actions;

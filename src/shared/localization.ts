@@ -153,19 +153,20 @@ const messages = {
     '변경된 값을 저장하면 다음 리뷰부터 적용됩니다.',
   ],
   'settings.savingStatus': ['Saving settings...', '설정을 저장하는 중...'],
-  'ollama.urlHint': [
+  'model.url': ['API URL', 'API URL'],
+  'model.urlHint': [
     'Enter an OpenAI-compatible API URL, including /v1.',
     '/v1을 포함한 OpenAI 호환 API URL을 입력하세요.',
   ],
-  'ollama.model': ['Model', '모델'],
-  'ollama.loading': ['Loading models...', '모델 조회 중...'],
-  'ollama.none': ['No models available', '선택 가능한 모델이 없습니다'],
-  'ollama.enterUrl': ['Enter an API URL.', 'API URL을 입력하세요.'],
-  'ollama.invalidUrl': [
+  'model.label': ['Model', '모델'],
+  'model.loading': ['Loading models...', '모델 조회 중...'],
+  'model.none': ['No models available', '선택 가능한 모델이 없습니다'],
+  'model.enterUrl': ['Enter an API URL.', 'API URL을 입력하세요.'],
+  'model.invalidUrl': [
     'Enter a valid HTTP or HTTPS API URL.',
     '올바른 HTTP 또는 HTTPS API URL을 입력하세요.',
   ],
-  'ollama.fetching': ['Loading available models...', '사용 가능한 모델을 조회하는 중...'],
+  'model.fetching': ['Loading available models...', '사용 가능한 모델을 조회하는 중...'],
   'host.alreadyRunning': [
     'A Codivew review is already running.',
     '이미 Codivew 리뷰가 진행 중입니다.',

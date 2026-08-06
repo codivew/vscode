@@ -34,7 +34,7 @@ export async function saveSettings(
   const language = parseLanguagePreference(message.language);
   const authentication = await resolveAuthentication(message, secrets);
   if (folder === undefined) return error(t('host.defaultWorkspace'));
-  if (ollamaUrl === undefined) return error(t('ollama.invalidUrl'));
+  if (ollamaUrl === undefined) return error(t('model.invalidUrl'));
   if (model === undefined) return error(t('host.selectModel'));
   if (maxDiffChars === undefined || maxDiffChars < 1_000) {
     return error(t('host.maxDiffInvalid'));

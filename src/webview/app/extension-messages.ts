@@ -1,4 +1,4 @@
-import { modelsReceived } from '../features/ollama/ollamaSlice.js';
+import { modelsReceived } from '../features/model/modelSlice.js';
 import {
   branchesReceived,
   currentBranchReceived,

@@ -4,13 +4,13 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks.js';
 import { vscode } from '../../../app/vscode-api.js';
 import Field from '../../../shared/components/Field.js';
 import { validHttpUrl } from '../../../shared/url.js';
-import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../ollamaSlice.js';
-import styles from './OllamaFields.module.css';
+import { modelChanged, modelsInvalidated, modelsRequested, urlChanged } from '../modelSlice.js';
+import styles from './ModelFields.module.css';
 import { t } from '../../../../shared/localization.js';
 
 let nextRequestId = 0;
 
-const OllamaFields = ({
+const ModelFields = ({
   disabled,
   fieldClassName,
 }: {
@@ -18,18 +18,18 @@ const OllamaFields = ({
   fieldClassName?: string;
 }): React.JSX.Element => {
   const dispatch = useAppDispatch();
-  const ollama = useAppSelector((state) => state.ollama);
+  const model = useAppSelector((state) => state.model);
   const settings = useAppSelector((state) => state.settings);
-  const hasModels = ollama.status === 'loaded' && ollama.models.length > 0;
+  const hasModels = model.status === 'loaded' && model.models.length > 0;
 
   useEffect(() => {
     const requestId = ++nextRequestId;
-    const validUrl = validHttpUrl(ollama.url);
+    const validUrl = validHttpUrl(model.url);
     if (validUrl === undefined) {
       dispatch(
         modelsInvalidated({
           requestId,
-          message: t('ollama.invalidUrl'),
+          message: t('model.invalidUrl'),
         }),
       );
       return;
@@ -50,7 +50,7 @@ const OllamaFields = ({
     return (): void => window.clearTimeout(timeout);
   }, [
     dispatch,
-    ollama.url,
+    model.url,
     settings.apiKey,
     settings.authenticationType,
     settings.password,
@@ -59,44 +59,44 @@ const OllamaFields = ({
 
   return (
     <>
-      <Field label="API URL" htmlFor="ollama-url" className={fieldClassName}>
+      <Field label={t('model.url')} htmlFor="model-url" className={fieldClassName}>
         <input
-          id="ollama-url"
+          id="model-url"
           type="url"
-          value={ollama.url}
+          value={model.url}
           placeholder="http://localhost:11434/v1"
           disabled={disabled}
           onChange={(event) => dispatch(urlChanged(event.target.value))}
           required
         />
-        <div className={styles.hint}>{t('ollama.urlHint')}</div>
+        <div className={styles.hint}>{t('model.urlHint')}</div>
       </Field>
 
-      <Field label={t('ollama.model')} htmlFor="model" className={fieldClassName}>
+      <Field label={t('model.label')} htmlFor="model" className={fieldClassName}>
         <select
           id="model"
-          value={ollama.model}
+          value={model.model}
           disabled={disabled || !hasModels}
           onChange={(event) => dispatch(modelChanged(event.target.value))}
           required
         >
           {!hasModels && (
             <option value="">
-              {ollama.status === 'loading' ? t('ollama.loading') : t('ollama.none')}
+              {model.status === 'loading' ? t('model.loading') : t('model.none')}
             </option>
           )}
-          {ollama.models.map((name) => (
+          {model.models.map((name) => (
             <option key={name} value={name}>
               {name}
             </option>
           ))}
         </select>
-        <div className={styles.hint} data-status={ollama.status}>
-          {ollama.message}
+        <div className={styles.hint} data-status={model.status}>
+          {model.message}
         </div>
       </Field>
     </>
   );
 };
 
-export default OllamaFields;
+export default ModelFields;
